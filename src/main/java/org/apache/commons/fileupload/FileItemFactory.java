@@ -21,7 +21,7 @@ package org.apache.commons.fileupload;
  * can provide their own custom configuration, over and above that provided
  * by the default file upload implementation.</p>
  *
- * @version $Id: FileItemFactory.java 1454690 2013-03-09 12:08:48Z simonetripodi $
+ * @version $Id$
  */
 public interface FileItemFactory {
 

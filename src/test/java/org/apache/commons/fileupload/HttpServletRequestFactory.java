@@ -19,7 +19,7 @@ package org.apache.commons.fileupload;
 import javax.servlet.http.HttpServletRequest;
 
 /**
- * @version $Id: HttpServletRequestFactory.java 1565246 2014-02-06 13:40:52Z ggregory $
+ * @version $Id$
  */
 final class HttpServletRequestFactory {
 

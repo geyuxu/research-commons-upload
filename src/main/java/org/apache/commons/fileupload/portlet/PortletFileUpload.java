@@ -46,7 +46,7 @@ import org.apache.commons.fileupload.FileUploadException;
  *
  * @since FileUpload 1.1
  *
- * @version $Id: PortletFileUpload.java 1455537 2013-03-12 14:06:11Z simonetripodi $
+ * @version $Id$
  */
 public class PortletFileUpload extends FileUpload {
 

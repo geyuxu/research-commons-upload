@@ -30,7 +30,7 @@ package org.apache.commons.fileupload;
  * used to create them; a given part may be in memory, on disk, or somewhere
  * else.</p>
  *
- * @version $Id: FileUpload.java 1454690 2013-03-09 12:08:48Z simonetripodi $
+ * @version $Id$
  */
 public class FileUpload
     extends FileUploadBase {

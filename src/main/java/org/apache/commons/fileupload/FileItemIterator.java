@@ -22,7 +22,7 @@ import java.io.IOException;
  * An iterator, as returned by
  * {@link FileUploadBase#getItemIterator(RequestContext)}.
  *
- * @version $Id: FileItemIterator.java 1454691 2013-03-09 12:15:54Z simonetripodi $
+ * @version $Id$
  */
 public interface FileItemIterator {
 

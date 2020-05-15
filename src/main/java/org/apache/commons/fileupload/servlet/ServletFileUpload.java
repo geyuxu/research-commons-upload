@@ -43,7 +43,7 @@ import org.apache.commons.fileupload.FileUploadException;
  * used to create them; a given part may be in memory, on disk, or somewhere
  * else.</p>
  *
- * @version $Id: ServletFileUpload.java 1455949 2013-03-13 14:14:44Z simonetripodi $
+ * @version $Id$
  */
 public class ServletFileUpload extends FileUpload {
 

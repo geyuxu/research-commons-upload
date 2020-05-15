@@ -20,7 +20,7 @@ package org.apache.commons.fileupload;
  * The {@link ProgressListener} may be used to display a progress bar
  * or do stuff like that.
  *
- * @version $Id: ProgressListener.java 1454691 2013-03-09 12:15:54Z simonetripodi $
+ * @version $Id$
  */
 public interface ProgressListener {
 

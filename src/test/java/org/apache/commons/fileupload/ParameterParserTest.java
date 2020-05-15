@@ -26,7 +26,7 @@ import org.junit.Test;
 /**
  * Unit tests for {@link ParameterParser}.
  *
- * @version $Id: ParameterParserTest.java 1455521 2013-03-12 13:18:01Z simonetripodi $
+ * @version $Id$
  */
 public class ParameterParserTest {
 

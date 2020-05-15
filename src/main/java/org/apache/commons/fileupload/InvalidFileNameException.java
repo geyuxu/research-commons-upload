@@ -26,7 +26,7 @@ package org.apache.commons.fileupload;
  * C library, it might create a file named "foo.exe", as the NUL
  * character is the string terminator in C.
  *
- * @version $Id: InvalidFileNameException.java 1454691 2013-03-09 12:15:54Z simonetripodi $
+ * @version $Id$
  */
 public class InvalidFileNameException extends RuntimeException {
 

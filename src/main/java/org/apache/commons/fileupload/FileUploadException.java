@@ -22,7 +22,7 @@ import java.io.PrintWriter;
 /**
  * Exception for errors encountered while processing the request.
  *
- * @version $Id: FileUploadException.java 1454690 2013-03-09 12:08:48Z simonetripodi $
+ * @version $Id$
  */
 public class FileUploadException extends Exception {
 

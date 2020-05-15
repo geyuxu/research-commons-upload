@@ -27,7 +27,7 @@ import org.apache.commons.io.FileCleaningTracker;
  * {@link FileCleaningTracker}'s reaper thread is terminated,
  * when the web application is destroyed.
  *
- * @version $Id: FileCleanerCleanup.java 1564788 2014-02-05 14:36:41Z markt $
+ * @version $Id$
  */
 public class FileCleanerCleanup implements ServletContextListener {
 

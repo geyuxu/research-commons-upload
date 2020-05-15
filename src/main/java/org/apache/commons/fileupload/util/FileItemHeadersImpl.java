@@ -32,7 +32,7 @@ import org.apache.commons.fileupload.FileItemHeaders;
  *
  * @since 1.2.1
  *
- * @version $Id: FileItemHeadersImpl.java 1458379 2013-03-19 16:16:47Z britter $
+ * @version $Id$
  */
 public class FileItemHeadersImpl implements FileItemHeaders, Serializable {
 

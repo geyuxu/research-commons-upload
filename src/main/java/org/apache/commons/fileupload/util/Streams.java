@@ -27,7 +27,7 @@ import org.apache.commons.io.IOUtils;
 /**
  * Utility class for working with streams.
  *
- * @version $Id: Streams.java 1565332 2014-02-06 16:42:19Z ggregory $
+ * @version $Id$
  */
 public final class Streams {
 

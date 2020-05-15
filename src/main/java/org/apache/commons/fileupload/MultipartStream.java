@@ -81,7 +81,7 @@ import org.apache.commons.fileupload.util.Streams;
  *   }
  * </pre>
  *
- * @version $Id: MultipartStream.java 1745065 2016-05-22 14:56:37Z britter $
+ * @version $Id$
  */
 public class MultipartStream {
 

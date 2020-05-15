@@ -34,7 +34,7 @@ import org.apache.commons.fileupload.util.mime.MimeUtility;
  *  <code>param1 = value; param2 = "anything goes; really"; param3</code>
  * </p>
  *
- * @version $Id: ParameterParser.java 1565253 2014-02-06 13:48:16Z ggregory $
+ * @version $Id$
  */
 public class ParameterParser {
 

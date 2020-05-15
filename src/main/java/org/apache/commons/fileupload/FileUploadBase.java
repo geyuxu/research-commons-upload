@@ -53,7 +53,7 @@ import org.apache.commons.fileupload.util.Streams;
  * used to create them; a given part may be in memory, on disk, or somewhere
  * else.</p>
  *
- * @version $Id: FileUploadBase.java 1743630 2016-05-13 09:20:45Z jochen $
+ * @version $Id$
  */
 public abstract class FileUploadBase {
 

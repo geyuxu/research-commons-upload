@@ -30,7 +30,7 @@ import org.junit.Test;
 /**
  * Tests the progress listener.
  *
- * @version $Id: ProgressListenerTest.java 1454693 2013-03-09 12:30:27Z simonetripodi $
+ * @version $Id$
  */
 public class ProgressListenerTest extends FileUploadTestCase {
 

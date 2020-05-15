@@ -39,7 +39,7 @@ import org.junit.Test;
 /**
  * Unit test for items with varying sizes.
  *
- * @version $Id: SizesTest.java 1458684 2013-03-20 08:31:53Z simonetripodi $
+ * @version $Id$
  */
 public class SizesTest extends FileUploadTestCase {
 

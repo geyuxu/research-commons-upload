@@ -71,10 +71,16 @@ import org.apache.commons.io.output.DeferredFileOutputStream;
  *
  * @since FileUpload 1.1
  *
- * @version $Id: DiskFileItem.java 1565192 2014-02-06 12:14:16Z markt $
+ * @version $Id$
  */
 public class DiskFileItem
     implements FileItem {
+
+    /**
+     * Although it implements {@link java.io.Serializable}, a DiskFileItem can actually only be deserialized,
+     * if this System property is true.
+     */
+    public static final String SERIALIZABLE_PROPERTY = DiskFileItem.class.getName() + ".serializable";
 
     // ----------------------------------------------------- Manifest constants
 
@@ -654,6 +660,10 @@ public class DiskFileItem
      */
     private void readObject(ObjectInputStream in)
             throws IOException, ClassNotFoundException {
+        if (!Boolean.getBoolean(SERIALIZABLE_PROPERTY)) {
+            throw new IllegalStateException("Property " + SERIALIZABLE_PROPERTY
+                    + " is not true, rejecting to deserialize a DiskFileItem.");
+        }
         // read values
         in.defaultReadObject();
 

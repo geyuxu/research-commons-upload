@@ -36,7 +36,7 @@ import junit.framework.TestCase;
 /**
  * Unit test for items with varying sizes.
  *
- * @version $Id: StreamingTest.java 1454693 2013-03-09 12:30:27Z simonetripodi $
+ * @version $Id$
  */
 public class StreamingTest extends TestCase {
 
