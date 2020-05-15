@@ -38,6 +38,7 @@ import org.apache.commons.fileupload.util.Closeable;
 import org.apache.commons.fileupload.util.FileItemHeadersImpl;
 import org.apache.commons.fileupload.util.LimitedInputStream;
 import org.apache.commons.fileupload.util.Streams;
+import org.apache.commons.io.IOUtils;
 
 /**
  * <p>High level API for processing file uploads.</p>
@@ -52,8 +53,6 @@ import org.apache.commons.fileupload.util.Streams;
  * <p>How the data for individual parts is stored is determined by the factory
  * used to create them; a given part may be in memory, on disk, or somewhere
  * else.</p>
- *
- * @version $Id$
  */
 public abstract class FileUploadBase {
 
@@ -365,8 +364,8 @@ public abstract class FileUploadBase {
                 for (FileItem fileItem : items) {
                     try {
                         fileItem.delete();
-                    } catch (Throwable e) {
-                        // ignore it
+                    } catch (Exception ignored) {
+                        // ignored TODO perhaps add to tracker delete failure list somehow?
                     }
                 }
             }
@@ -765,20 +764,23 @@ public abstract class FileUploadBase {
                 fieldName = pFieldName;
                 contentType = pContentType;
                 formField = pFormField;
-                final ItemInputStream itemStream = multi.newInputStream();
-                InputStream istream = itemStream;
-                if (fileSizeMax != -1) {
+                if (fileSizeMax != -1) { // Check if limit is already exceeded
                     if (pContentLength != -1
-                            &&  pContentLength > fileSizeMax) {
+                            && pContentLength > fileSizeMax) {
                         FileSizeLimitExceededException e =
-                            new FileSizeLimitExceededException(
-                                format("The field %s exceeds its maximum permitted size of %s bytes.",
-                                       fieldName, Long.valueOf(fileSizeMax)),
-                                pContentLength, fileSizeMax);
+                                new FileSizeLimitExceededException(
+                                        format("The field %s exceeds its maximum permitted size of %s bytes.",
+                                                fieldName, Long.valueOf(fileSizeMax)),
+                                        pContentLength, fileSizeMax);
                         e.setFileName(pName);
                         e.setFieldName(pFieldName);
                         throw new FileUploadIOException(e);
                     }
+                }
+                // OK to construct stream now
+                final ItemInputStream itemStream = multi.newInputStream();
+                InputStream istream = itemStream;
+                if (fileSizeMax != -1) {
                     istream = new LimitedInputStream(istream, fileSizeMax) {
                         @Override
                         protected void raiseError(long pSizeMax, long pCount)
@@ -803,6 +805,7 @@ public abstract class FileUploadBase {
              *
              * @return Content type, if known, or null.
              */
+            @Override
             public String getContentType() {
                 return contentType;
             }
@@ -812,6 +815,7 @@ public abstract class FileUploadBase {
              *
              * @return Field name.
              */
+            @Override
             public String getFieldName() {
                 return fieldName;
             }
@@ -825,6 +829,7 @@ public abstract class FileUploadBase {
              *   use the file name anyways, catch the exception and use
              *   InvalidFileNameException#getName().
              */
+            @Override
             public String getName() {
                 return Streams.checkFileName(name);
             }
@@ -835,6 +840,7 @@ public abstract class FileUploadBase {
              * @return True, if the item is a form field,
              *   otherwise false.
              */
+            @Override
             public boolean isFormField() {
                 return formField;
             }
@@ -846,6 +852,7 @@ public abstract class FileUploadBase {
              * @return Opened input stream.
              * @throws IOException An I/O error occurred.
              */
+            @Override
             public InputStream openStream() throws IOException {
                 if (opened) {
                     throw new IllegalStateException(
@@ -871,6 +878,7 @@ public abstract class FileUploadBase {
              *
              * @return The items header object
              */
+            @Override
             public FileItemHeaders getHeaders() {
                 return headers;
             }
@@ -880,6 +888,7 @@ public abstract class FileUploadBase {
              *
              * @param pHeaders The items header object
              */
+            @Override
             public void setHeaders(FileItemHeaders pHeaders) {
                 headers = pHeaders;
             }
@@ -949,7 +958,6 @@ public abstract class FileUploadBase {
                                MULTIPART_FORM_DATA, MULTIPART_MIXED, contentType));
             }
 
-            InputStream input = ctx.getInputStream();
 
             @SuppressWarnings("deprecation") // still has to be backward compatible
             final int contentLengthInt = ctx.getContentLength();
@@ -960,6 +968,7 @@ public abstract class FileUploadBase {
                                      : contentLengthInt;
                                      // CHECKSTYLE:ON
 
+            InputStream input; // N.B. this is eventually closed in MultipartStream processing
             if (sizeMax >= 0) {
                 if (requestSize != -1 && requestSize > sizeMax) {
                     throw new SizeLimitExceededException(
@@ -967,7 +976,8 @@ public abstract class FileUploadBase {
                                 Long.valueOf(requestSize), Long.valueOf(sizeMax)),
                                requestSize, sizeMax);
                 }
-                input = new LimitedInputStream(input, sizeMax) {
+                // N.B. this is eventually closed in MultipartStream processing
+                input = new LimitedInputStream(ctx.getInputStream(), sizeMax) {
                     @Override
                     protected void raiseError(long pSizeMax, long pCount)
                             throws IOException {
@@ -978,6 +988,8 @@ public abstract class FileUploadBase {
                         throw new FileUploadIOException(ex);
                     }
                 };
+            } else {
+                input = ctx.getInputStream();
             }
 
             String charEncoding = headerEncoding;
@@ -987,6 +999,7 @@ public abstract class FileUploadBase {
 
             boundary = getBoundary(contentType);
             if (boundary == null) {
+                IOUtils.closeQuietly(input); // avoid possible resource leak
                 throw new FileUploadException("the request was rejected because no multipart boundary was found");
             }
 
@@ -994,6 +1007,7 @@ public abstract class FileUploadBase {
             try {
                 multi = new MultipartStream(input, boundary, notifier);
             } catch (IllegalArgumentException iae) {
+                IOUtils.closeQuietly(input); // avoid possible resource leak
                 throw new InvalidContentTypeException(
                         format("The boundary specified in the %s header is too long", CONTENT_TYPE), iae);
             }
@@ -1095,6 +1109,7 @@ public abstract class FileUploadBase {
          * @return True, if one or more additional file items
          *   are available, otherwise false.
          */
+        @Override
         public boolean hasNext() throws FileUploadException, IOException {
             if (eof) {
                 return false;
@@ -1121,6 +1136,7 @@ public abstract class FileUploadBase {
          * @return FileItemStream instance, which provides
          *   access to the next file item.
          */
+        @Override
         public FileItemStream next() throws FileUploadException, IOException {
             if (eof  ||  (!itemValid && !hasNext())) {
                 throw new NoSuchElementException();
@@ -1361,7 +1377,7 @@ public abstract class FileUploadBase {
 
         /**
          * @deprecated 1.2 Replaced by
-         * {@code SizeLimitExceededException(String, long, long)}
+         * {@link #SizeLimitExceededException(String, long, long)}
          */
         @Deprecated
         public SizeLimitExceededException() {
@@ -1370,7 +1386,7 @@ public abstract class FileUploadBase {
 
         /**
          * @deprecated 1.2 Replaced by
-         * {@code #SizeLimitExceededException(String, long, long)}
+         * {@link #SizeLimitExceededException(String, long, long)}
          * @param message The exceptions detail message.
          */
         @Deprecated

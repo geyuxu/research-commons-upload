@@ -25,8 +25,6 @@ import org.junit.Test;
 
 /**
  * Unit tests {@link org.apache.commons.fileupload.MultipartStream}.
- *
- * @version $Id$
  */
 public class MultipartStreamTest {
 
@@ -48,7 +46,6 @@ public class MultipartStreamTest {
         assertNotNull(ms);
     }
 
-    @SuppressWarnings("unused")
     @Test(expected=IllegalArgumentException.class)
     public void testSmallBuffer() throws Exception {
         final String strData = "foobar";

@@ -28,11 +28,9 @@ import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.junit.Test;
 
 /**
- * Tests the progress listener.
- *
- * @version $Id$
+ * Tests the {@link ProgressListener}.
  */
-public class ProgressListenerTest extends FileUploadTestCase {
+public class ProgressListenerTest {
 
     private class ProgressListenerImpl implements ProgressListener {
 
@@ -49,6 +47,7 @@ public class ProgressListenerTest extends FileUploadTestCase {
             expectedItems = pItems;
         }
 
+        @Override
         public void update(long pBytesRead, long pContentLength, int pItems) {
             assertTrue(pBytesRead >= 0  &&  pBytesRead <= expectedContentLength);
             assertTrue(pContentLength == -1  ||  pContentLength == expectedContentLength);
@@ -87,9 +86,9 @@ public class ProgressListenerTest extends FileUploadTestCase {
         baos.write("-----1234--\r\n".getBytes("US-ASCII"));
         byte[] contents = baos.toByteArray();
 
-        MockHttpServletRequest request = new MockHttpServletRequest(contents, "multipart/form-data; boundary=---1234");
+        MockHttpServletRequest request = new MockHttpServletRequest(contents, Constants.CONTENT_TYPE);
         runTest(NUM_ITEMS, contents.length, request);
-        request = new MockHttpServletRequest(contents, "multipart/form-data; boundary=---1234"){
+        request = new MockHttpServletRequest(contents, Constants.CONTENT_TYPE){
             @Override
             public int getContentLength() {
                 return -1;
@@ -120,6 +119,7 @@ public class ProgressListenerTest extends FileUploadTestCase {
                 }
             }
             assertEquals(-1, istream.read());
+            istream.close();
         }
         assertTrue(!iter.hasNext());
         listener.checkFinished();

@@ -30,12 +30,13 @@
       <item name="User guide"               href="/using.html" />
       <item name="Streaming API"            href="/streaming.html" />
       <item name="FAQ"                      href="/faq.html" />
-      <item name="Javadoc"                  href="apidocs/index.html" />
+      <item name="Javadoc (Latest release)" href="/javadocs/api-release/index.html" />
       <item name="Download"                 href="/download_fileupload.cgi" />
+      <item name="Security Reports"         href="/security-reports.html"/>
       <item name="Mailing lists"            href="/mail-lists.html" />
       <item name="Issue Tracking"           href="/issue-tracking.html" />
       <item name="Team"                     href="/team-list.html" />
-      <item name="SVN repository"           href="/source-repository.html" />
+      <item name="Source repository"        href="/source-repository.html" />
     </menu>
   </body>
 

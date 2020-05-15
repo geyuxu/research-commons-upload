@@ -32,8 +32,6 @@ import org.apache.commons.fileupload.disk.DiskFileItem;
  * {@link #getInputStream()} and process the file without attempting to load
  * it into memory, which may come handy with large files.
  *
- * @version $Id$
- *
  * @deprecated 1.1 Use <code>DiskFileItem</code> instead.
  */
 @Deprecated
@@ -41,11 +39,6 @@ public class DefaultFileItem
     extends DiskFileItem {
 
     // ----------------------------------------------------------- Constructors
-
-    /**
-     * The UID to use when serializing this instance.
-     */
-    private static final long serialVersionUID = 4088572813833518255L;
 
     /**
      * Constructs a new <code>DefaultFileItem</code> instance.

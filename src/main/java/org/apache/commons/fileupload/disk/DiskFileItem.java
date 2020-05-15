@@ -18,16 +18,12 @@ package org.apache.commons.fileupload.disk;
 
 import static java.lang.String.format;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.Map;
@@ -39,6 +35,7 @@ import org.apache.commons.fileupload.FileItemHeaders;
 import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.ParameterParser;
 import org.apache.commons.fileupload.util.Streams;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.output.DeferredFileOutputStream;
 
@@ -70,24 +67,11 @@ import org.apache.commons.io.output.DeferredFileOutputStream;
  * in the users guide of commons-fileupload.</p>
  *
  * @since FileUpload 1.1
- *
- * @version $Id$
  */
 public class DiskFileItem
     implements FileItem {
 
-    /**
-     * Although it implements {@link java.io.Serializable}, a DiskFileItem can actually only be deserialized,
-     * if this System property is true.
-     */
-    public static final String SERIALIZABLE_PROPERTY = DiskFileItem.class.getName() + ".serializable";
-
     // ----------------------------------------------------- Manifest constants
-
-    /**
-     * The UID to use when serializing this instance.
-     */
-    private static final long serialVersionUID = 2237570099615271025L;
 
     /**
      * Default content charset to be used when no explicit charset
@@ -164,14 +148,15 @@ public class DiskFileItem
     private transient File tempFile;
 
     /**
-     * File to allow for serialization of the content of this item.
-     */
-    private File dfosFile;
-
-    /**
      * The file items headers.
      */
     private FileItemHeaders headers;
+
+    /**
+     * Default content charset to be used when no explicit charset
+     * parameter is provided by the sender.
+     */
+    private String defaultCharset = DEFAULT_CHARSET;
 
     // ----------------------------------------------------------- Constructors
 
@@ -214,6 +199,7 @@ public class DiskFileItem
      *
      * @throws IOException if an error occurs.
      */
+    @Override
     public InputStream getInputStream()
         throws IOException {
         if (!isInMemory()) {
@@ -233,6 +219,7 @@ public class DiskFileItem
      * @return The content type passed by the agent or <code>null</code> if
      *         not defined.
      */
+    @Override
     public String getContentType() {
         return contentType;
     }
@@ -261,6 +248,7 @@ public class DiskFileItem
      *   use the file name anyways, catch the exception and use
      *   {@link org.apache.commons.fileupload.InvalidFileNameException#getName()}.
      */
+    @Override
     public String getName() {
         return Streams.checkFileName(fileName);
     }
@@ -274,6 +262,7 @@ public class DiskFileItem
      * @return <code>true</code> if the file contents will be read
      *         from memory; <code>false</code> otherwise.
      */
+    @Override
     public boolean isInMemory() {
         if (cachedContent != null) {
             return true;
@@ -286,6 +275,7 @@ public class DiskFileItem
      *
      * @return The size of the file, in bytes.
      */
+    @Override
     public long getSize() {
         if (size >= 0) {
             return size;
@@ -303,11 +293,13 @@ public class DiskFileItem
      * contents of the file were not yet cached in memory, they will be
      * loaded from the disk storage and cached.
      *
-     * @return The contents of the file as an array of bytes.
+     * @return The contents of the file as an array of bytes
+     * or {@code null} if the data cannot be read
      */
+    @Override
     public byte[] get() {
         if (isInMemory()) {
-            if (cachedContent == null) {
+            if (cachedContent == null && dfos != null) {
                 cachedContent = dfos.getData();
             }
             return cachedContent;
@@ -317,18 +309,12 @@ public class DiskFileItem
         InputStream fis = null;
 
         try {
-            fis = new BufferedInputStream(new FileInputStream(dfos.getFile()));
-            fis.read(fileData);
+            fis = new FileInputStream(dfos.getFile());
+            IOUtils.readFully(fis, fileData);
         } catch (IOException e) {
             fileData = null;
         } finally {
-            if (fis != null) {
-                try {
-                    fis.close();
-                } catch (IOException e) {
-                    // ignore
-                }
-            }
+            IOUtils.closeQuietly(fis);
         }
 
         return fileData;
@@ -346,6 +332,7 @@ public class DiskFileItem
      * @throws UnsupportedEncodingException if the requested character
      *                                      encoding is not available.
      */
+    @Override
     public String getString(final String charset)
         throws UnsupportedEncodingException {
         return new String(get(), charset);
@@ -360,11 +347,12 @@ public class DiskFileItem
      *
      * @return The contents of the file, as a string.
      */
+    @Override
     public String getString() {
         byte[] rawdata = get();
         String charset = getCharSet();
         if (charset == null) {
-            charset = DEFAULT_CHARSET;
+            charset = defaultCharset;
         }
         try {
             return new String(rawdata, charset);
@@ -393,16 +381,16 @@ public class DiskFileItem
      *
      * @throws Exception if an error occurs.
      */
+    @Override
     public void write(File file) throws Exception {
         if (isInMemory()) {
             FileOutputStream fout = null;
             try {
                 fout = new FileOutputStream(file);
                 fout.write(get());
+                fout.close();
             } finally {
-                if (fout != null) {
-                    fout.close();
-                }
+                IOUtils.closeQuietly(fout);
             }
         } else {
             File outputFile = getStoreLocation();
@@ -414,32 +402,7 @@ public class DiskFileItem
                  * in a temporary location so move it to the
                  * desired file.
                  */
-                if (!outputFile.renameTo(file)) {
-                    BufferedInputStream in = null;
-                    BufferedOutputStream out = null;
-                    try {
-                        in = new BufferedInputStream(
-                            new FileInputStream(outputFile));
-                        out = new BufferedOutputStream(
-                                new FileOutputStream(file));
-                        IOUtils.copy(in, out);
-                    } finally {
-                        if (in != null) {
-                            try {
-                                in.close();
-                            } catch (IOException e) {
-                                // ignore
-                            }
-                        }
-                        if (out != null) {
-                            try {
-                                out.close();
-                            } catch (IOException e) {
-                                // ignore
-                            }
-                        }
-                    }
-                }
+                FileUtils.moveFile(outputFile, file);
             } else {
                 /*
                  * For whatever reason we cannot write the
@@ -458,10 +421,11 @@ public class DiskFileItem
      * collected, this method can be used to ensure that this is done at an
      * earlier time, thus preserving system resources.
      */
+    @Override
     public void delete() {
         cachedContent = null;
         File outputFile = getStoreLocation();
-        if (outputFile != null && outputFile.exists()) {
+        if (outputFile != null && !isInMemory() && outputFile.exists()) {
             outputFile.delete();
         }
     }
@@ -475,6 +439,7 @@ public class DiskFileItem
      * @see #setFieldName(java.lang.String)
      *
      */
+    @Override
     public String getFieldName() {
         return fieldName;
     }
@@ -487,6 +452,7 @@ public class DiskFileItem
      * @see #getFieldName()
      *
      */
+    @Override
     public void setFieldName(String fieldName) {
         this.fieldName = fieldName;
     }
@@ -501,6 +467,7 @@ public class DiskFileItem
      * @see #setFormField(boolean)
      *
      */
+    @Override
     public boolean isFormField() {
         return isFormField;
     }
@@ -515,6 +482,7 @@ public class DiskFileItem
      * @see #isFormField()
      *
      */
+    @Override
     public void setFormField(boolean state) {
         isFormField = state;
     }
@@ -524,10 +492,11 @@ public class DiskFileItem
      * be used for storing the contents of the file.
      *
      * @return An {@link java.io.OutputStream OutputStream} that can be used
-     *         for storing the contensts of the file.
+     *         for storing the contents of the file.
      *
      * @throws IOException if an error occurs.
      */
+    @Override
     public OutputStream getOutputStream()
         throws IOException {
         if (dfos == null) {
@@ -556,6 +525,9 @@ public class DiskFileItem
         if (dfos == null) {
             return null;
         }
+        if (isInMemory()) {
+            return null;
+        }
         return dfos.getFile();
     }
 
@@ -566,6 +538,9 @@ public class DiskFileItem
      */
     @Override
     protected void finalize() {
+        if (dfos == null || dfos.isInMemory()) {
+            return;
+        }
         File outputFile = dfos.getFile();
 
         if (outputFile != null && outputFile.exists()) {
@@ -578,6 +553,9 @@ public class DiskFileItem
      * named temporary file in the configured repository path. The lifetime of
      * the file is tied to the lifetime of the <code>FileItem</code> instance;
      * the file will be deleted when the instance is garbage collected.
+     * <p>
+     * <b>Note: Subclasses that override this method must ensure that they return the
+     * same File each time.</b>
      *
      * @return The {@link java.io.File File} to be used for temporary storage.
      */
@@ -599,7 +577,7 @@ public class DiskFileItem
 
     /**
      * Returns an identifier that is unique within the class loader used to
-     * load this class, but does not have random-like apearance.
+     * load this class, but does not have random-like appearance.
      *
      * @return A String with the non-random looking instance identifier.
      */
@@ -628,83 +606,11 @@ public class DiskFileItem
                       Boolean.valueOf(isFormField()), getFieldName());
     }
 
-    // -------------------------------------------------- Serialization methods
-
-    /**
-     * Writes the state of this object during serialization.
-     *
-     * @param out The stream to which the state should be written.
-     *
-     * @throws IOException if an error occurs.
-     */
-    private void writeObject(ObjectOutputStream out) throws IOException {
-        // Read the data
-        if (dfos.isInMemory()) {
-            cachedContent = get();
-        } else {
-            cachedContent = null;
-            dfosFile = dfos.getFile();
-        }
-
-        // write out values
-        out.defaultWriteObject();
-    }
-
-    /**
-     * Reads the state of this object during deserialization.
-     *
-     * @param in The stream from which the state should be read.
-     *
-     * @throws IOException if an error occurs.
-     * @throws ClassNotFoundException if class cannot be found.
-     */
-    private void readObject(ObjectInputStream in)
-            throws IOException, ClassNotFoundException {
-        if (!Boolean.getBoolean(SERIALIZABLE_PROPERTY)) {
-            throw new IllegalStateException("Property " + SERIALIZABLE_PROPERTY
-                    + " is not true, rejecting to deserialize a DiskFileItem.");
-        }
-        // read values
-        in.defaultReadObject();
-
-        /* One expected use of serialization is to migrate HTTP sessions
-         * containing a DiskFileItem between JVMs. Particularly if the JVMs are
-         * on different machines It is possible that the repository location is
-         * not valid so validate it.
-         */
-        if (repository != null) {
-            if (repository.isDirectory()) {
-                // Check path for nulls
-                if (repository.getPath().contains("\0")) {
-                    throw new IOException(format(
-                            "The repository [%s] contains a null character",
-                            repository.getPath()));
-                }
-            } else {
-                throw new IOException(format(
-                        "The repository [%s] is not a directory",
-                        repository.getAbsolutePath()));
-            }
-        }
-
-        OutputStream output = getOutputStream();
-        if (cachedContent != null) {
-            output.write(cachedContent);
-        } else {
-            FileInputStream input = new FileInputStream(dfosFile);
-            IOUtils.copy(input, output);
-            dfosFile.delete();
-            dfosFile = null;
-        }
-        output.close();
-
-        cachedContent = null;
-    }
-
     /**
      * Returns the file item headers.
      * @return The file items headers.
      */
+    @Override
     public FileItemHeaders getHeaders() {
         return headers;
     }
@@ -713,8 +619,26 @@ public class DiskFileItem
      * Sets the file item headers.
      * @param pHeaders The file items headers.
      */
+    @Override
     public void setHeaders(FileItemHeaders pHeaders) {
         headers = pHeaders;
     }
 
+    /**
+     * Returns the default charset for use when no explicit charset
+     * parameter is provided by the sender.
+     * @return the default charset
+     */
+    public String getDefaultCharset() {
+        return defaultCharset;
+    }
+
+    /**
+     * Sets the default charset for use when no explicit charset
+     * parameter is provided by the sender.
+     * @param charset the default charset
+     */
+    public void setDefaultCharset(String charset) {
+        defaultCharset = charset;
+    }
 }

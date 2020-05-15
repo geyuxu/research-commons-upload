@@ -26,8 +26,6 @@ import org.apache.commons.io.FileCleaningTracker;
  * A servlet context listener, which ensures that the
  * {@link FileCleaningTracker}'s reaper thread is terminated,
  * when the web application is destroyed.
- *
- * @version $Id$
  */
 public class FileCleanerCleanup implements ServletContextListener {
 
@@ -70,6 +68,7 @@ public class FileCleanerCleanup implements ServletContextListener {
      * @param sce The servlet context, used for calling
      *   {@link #setFileCleaningTracker(ServletContext, FileCleaningTracker)}.
      */
+    @Override
     public void contextInitialized(ServletContextEvent sce) {
         setFileCleaningTracker(sce.getServletContext(),
                 new FileCleaningTracker());
@@ -82,6 +81,7 @@ public class FileCleanerCleanup implements ServletContextListener {
      * @param sce The servlet context, used for calling
      *     {@link #getFileCleaningTracker(ServletContext)}.
      */
+    @Override
     public void contextDestroyed(ServletContextEvent sce) {
         getFileCleaningTracker(sce.getServletContext()).exitWhenFinished();
     }
