@@ -50,7 +50,7 @@ import org.apache.commons.fileupload.util.Streams;
  *   header-part := 1*header CRLF<br>
  *   header := header-name ":" header-value<br>
  *   header-name := &lt;printable ascii characters except ":"&gt;<br>
- *   header-value := &lt;any ascii characters except CR & LF&gt;<br>
+ *   header-value := &lt;any ascii characters except CR &amp; LF&gt;<br>
  *   body-data := &lt;arbitrary data&gt;<br>
  * </code>
  *
@@ -81,7 +81,7 @@ import org.apache.commons.fileupload.util.Streams;
  *   }
  * </pre>
  *
- * @version $Id: MultipartStream.java 1565249 2014-02-06 13:45:33Z ggregory $
+ * @version $Id: MultipartStream.java 1745065 2016-05-22 14:56:37Z britter $
  */
 public class MultipartStream {
 
@@ -325,12 +325,6 @@ public class MultipartStream {
         if (boundary == null) {
             throw new IllegalArgumentException("boundary may not be null");
         }
-
-        this.input = input;
-        this.bufSize = bufSize;
-        this.buffer = new byte[bufSize];
-        this.notifier = pNotifier;
-
         // We prepend CR/LF to the boundary to chop trailing CR/LF from
         // body-data tokens.
         this.boundaryLength = boundary.length + BOUNDARY_PREFIX.length;
@@ -338,6 +332,12 @@ public class MultipartStream {
             throw new IllegalArgumentException(
                     "The buffer size specified for the MultipartStream is too small");
         }
+
+        this.input = input;
+        this.bufSize = Math.max(bufSize, boundaryLength * 2);
+        this.buffer = new byte[this.bufSize];
+        this.notifier = pNotifier;
+
         this.boundary = new byte[this.boundaryLength];
         this.keepRegion = this.boundary.length;
 

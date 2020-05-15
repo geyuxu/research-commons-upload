@@ -28,16 +28,15 @@ import org.apache.commons.fileupload.disk.DiskFileItemFactory;
  * disk, is configurable, as is the directory in which temporary files will be
  * created.</p>
  *
- * <p>If not otherwise configured, the default configuration values are as
+ * If not otherwise configured, the default configuration values are as
  * follows:
  * <ul>
  *   <li>Size threshold is 10KB.</li>
  *   <li>Repository is the system default temp directory, as returned by
  *       <code>System.getProperty("java.io.tmpdir")</code>.</li>
  * </ul>
- * </p>
  *
- * @version $Id: DefaultFileItemFactory.java 1454690 2013-03-09 12:08:48Z simonetripodi $
+ * @version $Id: DefaultFileItemFactory.java 1743630 2016-05-13 09:20:45Z jochen $
  *
  * @deprecated 1.1 Use <code>DiskFileItemFactory</code> instead.
  */

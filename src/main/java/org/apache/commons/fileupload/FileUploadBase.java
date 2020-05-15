@@ -53,7 +53,7 @@ import org.apache.commons.fileupload.util.Streams;
  * used to create them; a given part may be in memory, on disk, or somewhere
  * else.</p>
  *
- * @version $Id: FileUploadBase.java 1565194 2014-02-06 12:16:30Z markt $
+ * @version $Id: FileUploadBase.java 1743630 2016-05-13 09:20:45Z jochen $
  */
 public abstract class FileUploadBase {
 
@@ -1361,7 +1361,7 @@ public abstract class FileUploadBase {
 
         /**
          * @deprecated 1.2 Replaced by
-         * {@link #SizeLimitExceededException(String, long, long)}
+         * {@code SizeLimitExceededException(String, long, long)}
          */
         @Deprecated
         public SizeLimitExceededException() {
@@ -1370,7 +1370,7 @@ public abstract class FileUploadBase {
 
         /**
          * @deprecated 1.2 Replaced by
-         * {@link #SizeLimitExceededException(String, long, long)}
+         * {@code #SizeLimitExceededException(String, long, long)}
          * @param message The exceptions detail message.
          */
         @Deprecated
