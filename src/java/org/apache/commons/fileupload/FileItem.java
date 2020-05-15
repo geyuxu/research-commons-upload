@@ -1,13 +1,13 @@
 /*
- * $Header: /home/cvs/jakarta-commons/fileupload/src/java/org/apache/commons/fileupload/FileItem.java,v 1.11 2002/12/25 04:05:07 martinc Exp $
- * $Revision: 1.11 $
- * $Date: 2002/12/25 04:05:07 $
+ * $Header: /home/cvs/jakarta-commons/fileupload/src/java/org/apache/commons/fileupload/FileItem.java,v 1.15 2003/06/01 17:33:24 martinc Exp $
+ * $Revision: 1.15 $
+ * $Date: 2003/06/01 17:33:24 $
  *
  * ====================================================================
  *
  * The Apache Software License, Version 1.1
  *
- * Copyright (c) 2001-2002 The Apache Software Foundation.  All rights
+ * Copyright (c) 2001-2003 The Apache Software Foundation.  All rights
  * reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -79,7 +79,7 @@ import java.io.UnsupportedEncodingException;
  * org.apache.commons.fileupload.FileUpload FileUpload} instance (see
  * {@link org.apache.commons.fileupload.FileUpload
  * #parseRequest(javax.servlet.http.HttpServletRequest)}), you may
- * either request all contents of file at once using {@link #get()} or
+ * either request all contents of the file at once using {@link #get()} or
  * request an {@link java.io.InputStream InputStream} with
  * {@link #getInputStream()} and process the file without attempting to load
  * it into memory, which may come handy with large files.
@@ -96,9 +96,10 @@ import java.io.UnsupportedEncodingException;
  * @author <a href="mailto:jvanzyl@apache.org">Jason van Zyl</a>
  * @author <a href="mailto:martinc@apache.org">Martin Cooper</a>
  *
- * @version $Id: FileItem.java,v 1.11 2002/12/25 04:05:07 martinc Exp $
+ * @version $Id: FileItem.java,v 1.15 2003/06/01 17:33:24 martinc Exp $
  */
-public interface FileItem extends Serializable
+public interface FileItem
+    extends Serializable
 {
 
 
@@ -129,21 +130,14 @@ public interface FileItem extends Serializable
 
 
     /**
-     * Returns the original filename in the client's filesystem.
+     * Returns the original filename in the client's filesystem, as provided by
+     * the browser (or other client software). In most cases, this will be the
+     * base file name, without path information. However, some clients, such as
+     * the Opera browser, do include path information.
      *
      * @return The original filename in the client's filesystem.
      */
     String getName();
-
-
-    // ----------------------------------------------------- Manifest constants
-
-
-    /**
-     * The maximal size of request that will have it's elements stored
-     * in memory.
-     */
-    public static final int DEFAULT_UPLOAD_SIZE_THRESHOLD = 10240;
 
 
     // ------------------------------------------------------- FileItem methods
@@ -153,38 +147,36 @@ public interface FileItem extends Serializable
      * Provides a hint as to whether or not the file contents will be read
      * from memory.
      *
-     * @return <code>true</code> if the file contents will be read
-     *         from memory.
+     * @return <code>true</code> if the file contents will be read from memory;
+     *         <code>false</code> otherwise.
      */
     boolean isInMemory();
 
 
     /**
-     * Returns the size of the file.
+     * Returns the size of the file item.
      *
-     * @return The size of the file, in bytes.
+     * @return The size of the file item, in bytes.
      */
     long getSize();
 
 
     /**
-     * Returns the contents of the file as an array of bytes.  If the
-     * contents of the file were not yet cached in memory, they will be
-     * loaded from the disk storage and cached.
+     * Returns the contents of the file item as an array of bytes.
      *
-     * @return The contents of the file as an array of bytes.
+     * @return The contents of the file item as an array of bytes.
      */
     byte[] get();
 
 
     /**
-     * Returns the contents of the file as a String, using the specified
+     * Returns the contents of the file item as a String, using the specified
      * encoding.  This method uses {@link #get()} to retrieve the
-     * contents of the file.
+     * contents of the item.
      *
      * @param encoding The character encoding to use.
      *
-     * @return The contents of the file, as a string.
+     * @return The contents of the item, as a string.
      *
      * @exception UnsupportedEncodingException if the requested character
      *                                         encoding is not available.
@@ -194,43 +186,32 @@ public interface FileItem extends Serializable
 
 
     /**
-     * Returns the contents of the file as a String, using the default
+     * Returns the contents of the file item as a String, using the default
      * character encoding.  This method uses {@link #get()} to retrieve the
-     * contents of the file.
+     * contents of the item.
      *
-     * @return The contents of the file, as a string.
+     * @return The contents of the item, as a string.
      */
     String getString();
 
 
     /**
-     * Returns the {@link java.io.File} object for the <code>FileItem</code>'s
-     * data's temporary location on the disk. Note that for
-     * <code>FileItem</code>s that have their data stored in memory,
-     * this method will return <code>null</code>. When handling large
-     * files, you can use {@link java.io.File#renameTo(File)} to
-     * move the file to new location without copying the data, if the
-     * source and destination locations reside within the same logical
-     * volume.
+     * A convenience method to write an uploaded item to disk. The client code
+     * is not concerned with whether or not the item is stored in memory, or on
+     * disk in a temporary location. They just want to write the uploaded item
+     * to a file.
+     * <p>
+     * This method is not guaranteed to succeed if called more than once for
+     * the same item. This allows a particular implementation to use, for
+     * example, file renaming, where possible, rather than copying all of the
+     * underlying data, thus gaining a significant performance benefit.
      *
-     * @return The data file, or <code>null</code> if the data is stored in
-     *         memory.
-     */
-    File getStoreLocation();
-
-
-    /**
-     * A convenience method to write an uploaded file to disk. The client code
-     * is not concerned whether or not the file is stored in memory, or on disk
-     * in a temporary location. They just want to write the uploaded file to
-     * disk.
-     *
-     * @param file The full path to location where the uploaded file should
+     * @param file The <code>File</code> into which the uploaded item should
      *             be stored.
      *
      * @exception Exception if an error occurs.
      */
-    void write(String file) throws Exception;
+    void write(File file) throws Exception;
 
 
     /**
@@ -277,7 +258,7 @@ public interface FileItem extends Serializable
      * @param state <code>true</code> if the instance represents a simple form
      *              field; <code>false</code> if it represents an uploaded file.
      */
-    void setIsFormField(boolean state);
+    void setFormField(boolean state);
 
 
     /**
@@ -289,6 +270,6 @@ public interface FileItem extends Serializable
      *
      * @exception IOException if an error occurs.
      */
-    public OutputStream getOutputStream() throws IOException;
+    OutputStream getOutputStream() throws IOException;
 
 }

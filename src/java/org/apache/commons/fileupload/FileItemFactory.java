@@ -1,7 +1,7 @@
 /*
- * $Header$
- * $Revision$
- * $Date$
+ * $Header: /home/cvs/jakarta-commons/fileupload/src/java/org/apache/commons/fileupload/FileItemFactory.java,v 1.1 2003/04/27 17:30:06 martinc Exp $
+ * $Revision: 1.1 $
+ * $Date: 2003/04/27 17:30:06 $
  *
  * ====================================================================
  *
@@ -63,47 +63,35 @@
 package org.apache.commons.fileupload;
 
 
-import junit.framework.TestCase;
-import java.io.*;
-
-
 /**
- * Unit tests {@link org.apache.commons.fileupload.MultipartStream}.
+ * <p>A factory interface for creating {@link FileItem} instances. Factories
+ * can provide their own custom configuration, over and above that provided
+ * by the default file upload implementation.</p>
  *
- * @author Sean C. Sullivan
+ * @author <a href="mailto:martinc@apache.org">Martin Cooper</a>
  * 
+ * @version $Id: FileItemFactory.java,v 1.1 2003/04/27 17:30:06 martinc Exp $
  */
-public class MultipartStreamTest extends TestCase
+public interface FileItemFactory
 {
-	static private final String BOUNDARY_TEXT = "myboundary";
 
-    public void testDefaultConstructor() throws Exception {
-    	MultipartStream ms = new MultipartStream();
-    	// todo - ms.setBoundary(BOUNDARY_TEXT.getBytes());
-    }
-
-    public void testThreeParamConstructor() throws Exception {
-		final String strData = "foobar";
-		InputStream input = new ByteArrayInputStream(strData.getBytes());
-    	byte[] boundary = BOUNDARY_TEXT.getBytes();
-    	int iBufSize = boundary.length;
-    	MultipartStream ms = new MultipartStream(
-    			input,
-    			boundary,
-    			iBufSize);
-    }
-
-	public void testTwoParamConstructor() throws Exception {
-		final String strData = "foobar";
-		InputStream input = new ByteArrayInputStream(strData.getBytes());
-		byte[] boundary = BOUNDARY_TEXT.getBytes();
-		MultipartStream ms = new MultipartStream(
-				input,
-				boundary);
-	}
-
-	public void testToString() {
-		MultipartStream ms = new MultipartStream();
-		assertNotNull(ms.toString());
-	}
+    /**
+     * Create a new {@link FileItem} instance from the supplied parameters and
+     * any local factory configuration.
+     *
+     * @param fieldName   The name of the form field.
+     * @param contentType The content type of the form field.
+     * @param isFormField <code>true</code> if this is a plain form field;
+     *                    <code>false</code> otherwise.
+     * @param fileName    The name of the uploaded file, if any, as supplied
+     *                    by the browser or other client.
+     *
+     * @return The newly created file item.
+     */
+    FileItem createItem(
+            String fieldName,
+            String contentType,
+            boolean isFormField,
+            String fileName
+            );
 }

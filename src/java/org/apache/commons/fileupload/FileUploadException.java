@@ -1,13 +1,13 @@
 /*
- * $Header: /home/cvs/jakarta-commons/fileupload/src/java/org/apache/commons/fileupload/FileUploadException.java,v 1.6 2002/10/26 22:08:17 sullis Exp $
- * $Revision: 1.6 $
- * $Date: 2002/10/26 22:08:17 $
+ * $Header: /home/cvs/jakarta-commons/fileupload/src/java/org/apache/commons/fileupload/FileUploadException.java,v 1.7 2003/04/27 17:30:06 martinc Exp $
+ * $Revision: 1.7 $
+ * $Date: 2003/04/27 17:30:06 $
  *
  * ====================================================================
  *
  * The Apache Software License, Version 1.1
  *
- * Copyright (c) 2001-2002 The Apache Software Foundation.  All rights
+ * Copyright (c) 2001-2003 The Apache Software Foundation.  All rights
  * reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -67,7 +67,7 @@ package org.apache.commons.fileupload;
  * Exception for errors encountered while processing the request.
  *
  * @author <a href="mailto:jmcnally@collab.net">John McNally</a>
- * @version $Id: FileUploadException.java,v 1.6 2002/10/26 22:08:17 sullis Exp $
+ * @version $Id: FileUploadException.java,v 1.7 2003/04/27 17:30:06 martinc Exp $
  */
 public class FileUploadException
     extends Exception

@@ -1,13 +1,13 @@
 /*
- * $Header: /home/cvs/jakarta-commons/fileupload/src/java/org/apache/commons/fileupload/MultipartStream.java,v 1.9 2002/11/26 04:13:50 jericho Exp $
- * $Revision: 1.9 $
- * $Date: 2002/11/26 04:13:50 $
+ * $Header: /home/cvs/jakarta-commons/fileupload/src/java/org/apache/commons/fileupload/MultipartStream.java,v 1.12 2003/06/01 00:18:13 martinc Exp $
+ * $Revision: 1.12 $
+ * $Date: 2003/06/01 00:18:13 $
  *
  * ====================================================================
  *
  * The Apache Software License, Version 1.1
  *
- * Copyright (c) 2001-2002 The Apache Software Foundation.  All rights
+ * Copyright (c) 2001-2003 The Apache Software Foundation.  All rights
  * reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -63,10 +63,11 @@
 package org.apache.commons.fileupload;
 
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.ByteArrayOutputStream;
+import java.io.UnsupportedEncodingException;
 
 
 /**
@@ -126,8 +127,9 @@ import java.io.ByteArrayOutputStream;
  *
  * @author <a href="mailto:Rafal.Krzewski@e-point.pl">Rafal Krzewski</a>
  * @author <a href="mailto:martinc@apache.org">Martin Cooper</a>
+ * @author Sean C. Sullivan
  *
- * @version $Id: MultipartStream.java,v 1.9 2002/11/26 04:13:50 jericho Exp $
+ * @version $Id: MultipartStream.java,v 1.12 2003/06/01 00:18:13 martinc Exp $
  */
 public class MultipartStream
 {
@@ -225,11 +227,21 @@ public class MultipartStream
     private int tail;
 
 
+    /**
+     * The content encoding to use when reading headers.
+     */
+    private String headerEncoding;
+
+
     // ----------------------------------------------------------- Constructors
 
 
     /**
      * Default constructor.
+     *
+     * @see #MultipartStream(InputStream, byte[], int)
+     * @see #MultipartStream(InputStream, byte[])
+     *
      */
     public MultipartStream()
     {
@@ -248,6 +260,11 @@ public class MultipartStream
      * @param boundary The token used for dividing the stream into
      *                 <code>encapsulations</code>.
      * @param bufSize  The size of the buffer to be used, in bytes.
+     *
+     *
+     * @see #MultipartStream()
+     * @see #MultipartStream(InputStream, byte[])
+     *
      */
     public MultipartStream(InputStream input,
                            byte[] boundary,
@@ -281,6 +298,10 @@ public class MultipartStream
      *                 <code>encapsulations</code>.
      *
      * @exception IOException when an error occurs.
+     *
+     * @see #MultipartStream()
+     * @see #MultipartStream(InputStream, byte[], int)
+     *
      */
     public MultipartStream(InputStream input,
                            byte[] boundary)
@@ -291,6 +312,33 @@ public class MultipartStream
 
 
     // --------------------------------------------------------- Public methods
+
+
+    /**
+     * Retrieves the character encoding used when reading the headers of an
+     * individual part. When not specified, or <code>null</code>, the platform
+     * default encoding is used.
+
+     *
+     * @return The encoding used to read part headers.
+     */
+    public String getHeaderEncoding()
+    {
+        return headerEncoding;
+    }
+
+
+    /**
+     * Specifies the character encoding to be used when reading the headers of
+     * individual parts. When not specified, or <code>null</code>, the platform
+     * default encoding is used.
+     *
+     * @param encoding The encoding used to read part headers.
+     */
+    public void setHeaderEncoding(String encoding)
+    {
+        headerEncoding = encoding;
+    }
 
 
     /**
@@ -442,7 +490,27 @@ public class MultipartStream
                 baos.write(b[0]);
             }
         }
-        return baos.toString();
+
+        String headers = null;
+        if (headerEncoding != null)
+        {
+            try
+            {
+                headers = baos.toString(headerEncoding);
+            }
+            catch (UnsupportedEncodingException e)
+            {
+                // Fall back to platform default if specified encoding is not
+                // supported.
+                headers = baos.toString();
+            }
+        }
+        else
+        {
+            headers = baos.toString();
+        }
+
+        return headers;
     }
 
 
@@ -728,6 +796,20 @@ public class MultipartStream
         return -1;
     }
 
+    /**
+     * Returns a string representation of this object.
+     *
+     * @return The string representation of this object.
+     */
+    public String toString()
+    {
+        StringBuffer sbTemp = new StringBuffer();
+        sbTemp.append("boundary='");
+        sbTemp.append(String.valueOf(boundary));
+        sbTemp.append("'\nbufSize=");
+        sbTemp.append(bufSize);
+        return sbTemp.toString();
+    }
 
     /**
      * Thrown to indicate that the input stream fails to follow the
