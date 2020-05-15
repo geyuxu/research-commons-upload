@@ -19,7 +19,7 @@ package org.apache.commons.fileupload;
 import javax.servlet.http.HttpServletRequest;
 
 /**
- * @version $Id: HttpServletRequestFactory.java 1454693 2013-03-09 12:30:27Z simonetripodi $
+ * @version $Id: HttpServletRequestFactory.java 1565246 2014-02-06 13:40:52Z ggregory $
  */
 final class HttpServletRequestFactory {
 
@@ -34,11 +34,10 @@ final class HttpServletRequestFactory {
             final String[] strFileNames) {
         // todo - provide a real implementation
 
-        StringBuffer sbRequestData = new StringBuffer();
+        StringBuilder sbRequestData = new StringBuilder();
 
-        for (int i = 0; i < strFileNames.length; i++)
-        {
-            sbRequestData.append(strFileNames[i]);
+        for (String strFileName : strFileNames) {
+            sbRequestData.append(strFileName);
         }
 
         byte[] requestData = null;

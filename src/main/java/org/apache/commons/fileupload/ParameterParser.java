@@ -34,7 +34,7 @@ import org.apache.commons.fileupload.util.mime.MimeUtility;
  *  <code>param1 = value; param2 = "anything goes; really"; param3</code>
  * </p>
  *
- * @version $Id: ParameterParser.java 1456515 2013-03-14 16:37:17Z simonetripodi $
+ * @version $Id: ParameterParser.java 1565253 2014-02-06 13:48:16Z ggregory $
  */
 public class ParameterParser {
 
@@ -129,8 +129,8 @@ public class ParameterParser {
      */
     private boolean isOneOf(char ch, final char[] charray) {
         boolean result = false;
-        for (int i = 0; i < charray.length; i++) {
-            if (ch == charray[i]) {
+        for (char element : charray) {
+            if (ch == element) {
                 result = true;
                 break;
             }
@@ -235,11 +235,11 @@ public class ParameterParser {
         char separator = separators[0];
         if (str != null) {
             int idx = str.length();
-            for (int i = 0;  i < separators.length;  i++) {
-                int tmp = str.indexOf(separators[i]);
+            for (char separator2 : separators) {
+                int tmp = str.indexOf(separator2);
                 if (tmp != -1 && tmp < idx) {
                     idx = tmp;
-                    separator = separators[i];
+                    separator = separator2;
                 }
             }
         }
@@ -266,24 +266,24 @@ public class ParameterParser {
      * Extracts a map of name/value pairs from the given array of
      * characters. Names are expected to be unique.
      *
-     * @param chars the array of characters that contains a sequence of
+     * @param charArray the array of characters that contains a sequence of
      * name/value pairs
      * @param separator the name/value pairs separator
      *
      * @return a map of name/value pairs
      */
-    public Map<String, String> parse(final char[] chars, char separator) {
-        if (chars == null) {
+    public Map<String, String> parse(final char[] charArray, char separator) {
+        if (charArray == null) {
             return new HashMap<String, String>();
         }
-        return parse(chars, 0, chars.length, separator);
+        return parse(charArray, 0, charArray.length, separator);
     }
 
     /**
      * Extracts a map of name/value pairs from the given array of
      * characters. Names are expected to be unique.
      *
-     * @param chars the array of characters that contains a sequence of
+     * @param charArray the array of characters that contains a sequence of
      * name/value pairs
      * @param offset - the initial offset.
      * @param length - the length.
@@ -292,16 +292,16 @@ public class ParameterParser {
      * @return a map of name/value pairs
      */
     public Map<String, String> parse(
-        final char[] chars,
+        final char[] charArray,
         int offset,
         int length,
         char separator) {
 
-        if (chars == null) {
+        if (charArray == null) {
             return new HashMap<String, String>();
         }
         HashMap<String, String> params = new HashMap<String, String>();
-        this.chars = chars;
+        this.chars = charArray;
         this.pos = offset;
         this.len = length;
 
@@ -311,7 +311,7 @@ public class ParameterParser {
             paramName = parseToken(new char[] {
                     '=', separator });
             paramValue = null;
-            if (hasChar() && (chars[pos] == '=')) {
+            if (hasChar() && (charArray[pos] == '=')) {
                 pos++; // skip '='
                 paramValue = parseQuotedToken(new char[] {
                         separator });
@@ -324,7 +324,7 @@ public class ParameterParser {
                     }
                 }
             }
-            if (hasChar() && (chars[pos] == separator)) {
+            if (hasChar() && (charArray[pos] == separator)) {
                 pos++; // skip separator
             }
             if ((paramName != null) && (paramName.length() > 0)) {

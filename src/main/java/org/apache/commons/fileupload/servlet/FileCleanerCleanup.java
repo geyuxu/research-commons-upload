@@ -24,11 +24,10 @@ import org.apache.commons.io.FileCleaningTracker;
 
 /**
  * A servlet context listener, which ensures that the
- * {@link org.apache.commons.io.FileCleaner FileCleaner's}
- * reaper thread is terminated,
+ * {@link FileCleaningTracker}'s reaper thread is terminated,
  * when the web application is destroyed.
  *
- * @version $Id: FileCleanerCleanup.java 1454691 2013-03-09 12:15:54Z simonetripodi $
+ * @version $Id: FileCleanerCleanup.java 1564788 2014-02-05 14:36:41Z markt $
  */
 public class FileCleanerCleanup implements ServletContextListener {
 

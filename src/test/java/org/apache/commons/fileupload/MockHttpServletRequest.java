@@ -33,7 +33,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
 /**
- * @version $Id: MockHttpServletRequest.java 1455729 2013-03-12 22:01:02Z tn $
+ * @version $Id: MockHttpServletRequest.java 1565255 2014-02-06 13:49:17Z ggregory $
  */
 class MockHttpServletRequest implements HttpServletRequest {
 
@@ -42,7 +42,7 @@ class MockHttpServletRequest implements HttpServletRequest {
     private long length;
 
     private String m_strContentType;
-    
+
     private int readLimit = -1;
 
     private final Map<String, String> m_headers = new java.util.HashMap<String, String>();
@@ -302,7 +302,7 @@ class MockHttpServletRequest implements HttpServletRequest {
     public void setContentLength(long length) {
         this.length = length;
     }
-    
+
     /**
      * @see javax.servlet.ServletRequest#getContentType()
      */
@@ -379,6 +379,7 @@ class MockHttpServletRequest implements HttpServletRequest {
     /**
      * @see javax.servlet.ServletRequest#getLocalName()
      */
+    @SuppressWarnings("javadoc") // This is a Servlet 2.4 method
     public String getLocalName() {
         return null;
     }
@@ -393,6 +394,7 @@ class MockHttpServletRequest implements HttpServletRequest {
     /**
      * @see javax.servlet.ServletRequest#getLocalPort()
      */
+    @SuppressWarnings("javadoc") // This is a Servlet 2.4 method
     public int getLocalPort() {
         return 0;
     }
@@ -400,6 +402,7 @@ class MockHttpServletRequest implements HttpServletRequest {
     /**
      * @see javax.servlet.ServletRequest#getRemotePort()
      */
+    @SuppressWarnings("javadoc") // This is a Servlet 2.4 method
     public int getRemotePort() {
         return 0;
     }
@@ -421,6 +424,7 @@ class MockHttpServletRequest implements HttpServletRequest {
     /**
      * @see javax.servlet.ServletRequest#getLocalAddr()
      */
+    @SuppressWarnings("javadoc") // This is a Servlet 2.4 method
     public String getLocalAddr() {
         return null;
     }
@@ -505,9 +509,8 @@ class MockHttpServletRequest implements HttpServletRequest {
         public int read(byte b[], int off, int len) throws IOException {
             if (readLimit > 0) {
                 return in.read(b, off, Math.min(readLimit, len));
-            } else {
-                return in.read(b, off, len);
             }
+            return in.read(b, off, len);
         }
 
     }

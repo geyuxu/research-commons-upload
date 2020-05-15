@@ -32,7 +32,7 @@ import org.apache.commons.fileupload.UploadContext;
  *
  * @since FileUpload 1.1
  *
- * @version $Id: ServletRequestContext.java 1455855 2013-03-13 09:58:59Z simonetripodi $
+ * @version $Id: ServletRequestContext.java 1564788 2014-02-05 14:36:41Z markt $
  */
 public class ServletRequestContext implements UploadContext {
 
@@ -120,8 +120,8 @@ public class ServletRequestContext implements UploadContext {
     @Override
     public String toString() {
         return format("ContentLength=%s, ContentType=%s",
-                      this.contentLength(),
-                      this.getContentType());
+                Long.valueOf(this.contentLength()),
+                this.getContentType());
     }
 
 }

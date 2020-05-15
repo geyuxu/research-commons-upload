@@ -32,7 +32,7 @@ import org.apache.commons.fileupload.UploadContext;
  *
  * @since FileUpload 1.1
  *
- * @version $Id: PortletRequestContext.java 1455855 2013-03-13 09:58:59Z simonetripodi $
+ * @version $Id: PortletRequestContext.java 1564788 2014-02-05 14:36:41Z markt $
  */
 public class PortletRequestContext implements UploadContext {
 
@@ -122,7 +122,7 @@ public class PortletRequestContext implements UploadContext {
     @Override
     public String toString() {
         return format("ContentLength=%s, ContentType=%s",
-                      this.getContentLength(),
+                      Long.valueOf(this.contentLength()),
                       this.getContentType());
     }
 

@@ -24,7 +24,7 @@ import java.io.InputStream;
  * An input stream, which limits its data size. This stream is
  * used, if the content length is unknown.
  *
- * @version $Id: LimitedInputStream.java 1454691 2013-03-09 12:15:54Z simonetripodi $
+ * @version $Id: LimitedInputStream.java 1565292 2014-02-06 14:51:59Z ggregory $
  */
 public abstract class LimitedInputStream extends FilterInputStream implements Closeable {
 
@@ -46,12 +46,12 @@ public abstract class LimitedInputStream extends FilterInputStream implements Cl
     /**
      * Creates a new instance.
      *
-     * @param pIn The input stream, which shall be limited.
+     * @param inputStream The input stream, which shall be limited.
      * @param pSizeMax The limit; no more than this number of bytes
      *   shall be returned by the source stream.
      */
-    public LimitedInputStream(InputStream pIn, long pSizeMax) {
-        super(pIn);
+    public LimitedInputStream(InputStream inputStream, long pSizeMax) {
+        super(inputStream);
         sizeMax = pSizeMax;
     }
 

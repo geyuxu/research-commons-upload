@@ -47,7 +47,7 @@ import org.apache.commons.io.output.DeferredFileOutputStream;
  * {@link org.apache.commons.fileupload.FileItem FileItem} interface.
  *
  * <p> After retrieving an instance of this class from a {@link
- * org.apache.commons.fileupload.DiskFileUpload DiskFileUpload} instance (see
+ * DiskFileItemFactory} instance (see
  * {@link org.apache.commons.fileupload.servlet.ServletFileUpload
  * #parseRequest(javax.servlet.http.HttpServletRequest)}), you may
  * either request all contents of file at once using {@link #get()} or
@@ -62,16 +62,16 @@ import org.apache.commons.io.output.DeferredFileOutputStream;
  * then you must consider the following: Temporary files are automatically
  * deleted as soon as they are no longer needed. (More precisely, when the
  * corresponding instance of {@link java.io.File} is garbage collected.)
- * This is done by the so-called reaper thread, which is started
- * automatically when the class {@link org.apache.commons.io.FileCleaner}
- * is loaded.
+ * This is done by the so-called reaper thread, which is started and stopped
+ * automatically by the {@link org.apache.commons.io.FileCleaningTracker} when
+ * there are files to be tracked.
  * It might make sense to terminate that thread, for example, if
  * your web application ends. See the section on "Resource cleanup"
  * in the users guide of commons-fileupload.</p>
  *
  * @since FileUpload 1.1
  *
- * @version $Id: DiskFileItem.java 1454690 2013-03-09 12:08:48Z simonetripodi $
+ * @version $Id: DiskFileItem.java 1565192 2014-02-06 12:14:16Z markt $
  */
 public class DiskFileItem
     implements FileItem {
@@ -113,7 +113,7 @@ public class DiskFileItem
      * The content type passed by the browser, or <code>null</code> if
      * not defined.
      */
-    private String contentType;
+    private final String contentType;
 
     /**
      * Whether or not this item is a simple form field.
@@ -123,7 +123,7 @@ public class DiskFileItem
     /**
      * The original filename in the user's filesystem.
      */
-    private String fileName;
+    private final String fileName;
 
     /**
      * The size of the item, in bytes. This is used to cache the size when a
@@ -135,12 +135,12 @@ public class DiskFileItem
     /**
      * The threshold above which uploads will be stored on disk.
      */
-    private int sizeThreshold;
+    private final int sizeThreshold;
 
     /**
      * The directory in which uploaded files will be stored, if stored on disk.
      */
-    private File repository;
+    private final File repository;
 
     /**
      * Cached contents of the file.
@@ -618,7 +618,8 @@ public class DiskFileItem
     @Override
     public String toString() {
         return format("name=%s, StoreLocation=%s, size=%s bytes, isFormField=%s, FieldName=%s",
-                      getName(), getStoreLocation(), getSize(), isFormField(), getFieldName());
+                      getName(), getStoreLocation(), Long.valueOf(getSize()),
+                      Boolean.valueOf(isFormField()), getFieldName());
     }
 
     // -------------------------------------------------- Serialization methods
@@ -655,6 +656,26 @@ public class DiskFileItem
             throws IOException, ClassNotFoundException {
         // read values
         in.defaultReadObject();
+
+        /* One expected use of serialization is to migrate HTTP sessions
+         * containing a DiskFileItem between JVMs. Particularly if the JVMs are
+         * on different machines It is possible that the repository location is
+         * not valid so validate it.
+         */
+        if (repository != null) {
+            if (repository.isDirectory()) {
+                // Check path for nulls
+                if (repository.getPath().contains("\0")) {
+                    throw new IOException(format(
+                            "The repository [%s] contains a null character",
+                            repository.getPath()));
+                }
+            } else {
+                throw new IOException(format(
+                        "The repository [%s] is not a directory",
+                        repository.getAbsolutePath()));
+            }
+        }
 
         OutputStream output = getOutputStream();
         if (cachedContent != null) {

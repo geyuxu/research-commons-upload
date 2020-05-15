@@ -53,7 +53,7 @@ import org.apache.commons.fileupload.util.Streams;
  * used to create them; a given part may be in memory, on disk, or somewhere
  * else.</p>
  *
- * @version $Id: FileUploadBase.java 1458220 2013-03-19 10:56:17Z markt $
+ * @version $Id: FileUploadBase.java 1565194 2014-02-06 12:16:30Z markt $
  */
 public abstract class FileUploadBase {
 
@@ -773,7 +773,7 @@ public abstract class FileUploadBase {
                         FileSizeLimitExceededException e =
                             new FileSizeLimitExceededException(
                                 format("The field %s exceeds its maximum permitted size of %s bytes.",
-                                       fieldName, fileSizeMax),
+                                       fieldName, Long.valueOf(fileSizeMax)),
                                 pContentLength, fileSizeMax);
                         e.setFileName(pName);
                         e.setFieldName(pFieldName);
@@ -787,7 +787,7 @@ public abstract class FileUploadBase {
                             FileSizeLimitExceededException e =
                                 new FileSizeLimitExceededException(
                                     format("The field %s exceeds its maximum permitted size of %s bytes.",
-                                           fieldName, pSizeMax),
+                                           fieldName, Long.valueOf(pSizeMax)),
                                     pCount, pSizeMax);
                             e.setFieldName(fieldName);
                             e.setFileName(name);
@@ -946,7 +946,7 @@ public abstract class FileUploadBase {
                     || (!contentType.toLowerCase(Locale.ENGLISH).startsWith(MULTIPART))) {
                 throw new InvalidContentTypeException(
                         format("the request doesn't contain a %s or %s stream, content type header is %s",
-                               MULTIPART_FORM_DATA, MULTIPART_FORM_DATA, contentType));
+                               MULTIPART_FORM_DATA, MULTIPART_MIXED, contentType));
             }
 
             InputStream input = ctx.getInputStream();
@@ -964,7 +964,7 @@ public abstract class FileUploadBase {
                 if (requestSize != -1 && requestSize > sizeMax) {
                     throw new SizeLimitExceededException(
                         format("the request was rejected because its size (%s) exceeds the configured maximum (%s)",
-                               requestSize, sizeMax),
+                                Long.valueOf(requestSize), Long.valueOf(sizeMax)),
                                requestSize, sizeMax);
                 }
                 input = new LimitedInputStream(input, sizeMax) {
@@ -973,7 +973,7 @@ public abstract class FileUploadBase {
                             throws IOException {
                         FileUploadException ex = new SizeLimitExceededException(
                         format("the request was rejected because its size (%s) exceeds the configured maximum (%s)",
-                               pCount, pSizeMax),
+                                Long.valueOf(pCount), Long.valueOf(pSizeMax)),
                                pCount, pSizeMax);
                         throw new FileUploadIOException(ex);
                     }
@@ -991,7 +991,12 @@ public abstract class FileUploadBase {
             }
 
             notifier = new MultipartStream.ProgressNotifier(listener, requestSize);
-            multi = new MultipartStream(input, boundary, notifier);
+            try {
+                multi = new MultipartStream(input, boundary, notifier);
+            } catch (IllegalArgumentException iae) {
+                throw new InvalidContentTypeException(
+                        format("The boundary specified in the %s header is too long", CONTENT_TYPE), iae);
+            }
             multi.setHeaderEncoding(charEncoding);
 
             skipPreamble = true;
@@ -1183,7 +1188,7 @@ public abstract class FileUploadBase {
          * detail message.
          */
         public InvalidContentTypeException() {
-            // Nothing to do.
+            super();
         }
 
         /**
@@ -1196,6 +1201,18 @@ public abstract class FileUploadBase {
             super(message);
         }
 
+        /**
+         * Constructs an <code>InvalidContentTypeException</code> with
+         * the specified detail message and cause.
+         *
+         * @param msg The detail message.
+         * @param cause the original cause
+         *
+         * @since 1.3.1
+         */
+        public InvalidContentTypeException(String msg, Throwable cause) {
+            super(msg, cause);
+        }
     }
 
     /**
