@@ -1,11 +1,12 @@
 /*
- * Copyright 2001-2005 The Apache Software Foundation
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -27,7 +28,6 @@ import java.io.OutputStream;
 import java.io.ObjectOutputStream;
 import java.io.ObjectInputStream;
 import java.io.UnsupportedEncodingException;
-import java.rmi.server.UID;
 import java.util.Map;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.FileCleaner;
@@ -51,6 +51,16 @@ import org.apache.commons.fileupload.ParameterParser;
  * {@link #getInputStream()} and process the file without attempting to load
  * it into memory, which may come handy with large files.
  *
+ * <p>When using the <code>DiskFileItemFactory</code>, then you should
+ * consider the following: Temporary files are automatically deleted as
+ * soon as they are no longer needed. (More precisely, when the
+ * corresponding instance of {@link java.io.File} is garbage collected.)
+ * This is done by the so-called reaper thread, which is started
+ * automatically when the class {@link FileCleaner} is loaded.
+ * It might make sense to terminate that thread, for example, if
+ * your web application ends. See the section on "Resource cleanup"
+ * in the users guide of commons-fileupload.</p>
+ *
  * @author <a href="mailto:Rafal.Krzewski@e-point.pl">Rafal Krzewski</a>
  * @author <a href="mailto:sean@informage.net">Sean Legassick</a>
  * @author <a href="mailto:jvanzyl@apache.org">Jason van Zyl</a>
@@ -60,7 +70,7 @@ import org.apache.commons.fileupload.ParameterParser;
  *
  * @since FileUpload 1.1
  *
- * @version $Id: DiskFileItem.java 399546 2006-05-04 04:53:30Z martinc $
+ * @version $Id: DiskFileItem.java 482993 2006-12-06 09:42:01Z jochen $
  */
 public class DiskFileItem
     implements FileItem {
@@ -84,7 +94,8 @@ public class DiskFileItem
      * UID used in unique file name generation.
      */
     private static final String UID =
-            new UID().toString().replace(':', '_').replace('-', '_');
+            new java.rmi.server.UID().toString()
+                .replace(':', '_').replace('-', '_');
 
     /**
      * Counter used in unique identifier generation.
@@ -261,9 +272,8 @@ public class DiskFileItem
     public boolean isInMemory() {
         if (cachedContent != null) {
             return true;
-        } else {
-            return dfos.isInMemory();
         }
+        return dfos.isInMemory();
     }
 
 
@@ -584,9 +594,9 @@ public class DiskFileItem
             tempDir = new File(System.getProperty("java.io.tmpdir"));
         }
 
-        String fileName = "upload_" + UID + "_" + getUniqueId() + ".tmp";
+        String tempFileName = "upload_" + UID + "_" + getUniqueId() + ".tmp";
 
-        File f = new File(tempDir, fileName);
+        File f = new File(tempDir, tempFileName);
         FileCleaner.track(f, this);
         return f;
     }

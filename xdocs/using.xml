@@ -1,18 +1,19 @@
 <?xml version="1.0"?>
 <!--
-   Copyright 2003-2004 The Apache Software Foundation
+ Licensed to the Apache Software Foundation (ASF) under one or more
+ contributor license agreements.  See the NOTICE file distributed with
+ this work for additional information regarding copyright ownership.
+ The ASF licenses this file to You under the Apache License, Version 2.0
+ (the "License"); you may not use this file except in compliance with
+ the License.  You may obtain a copy of the License at
 
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
+      http://www.apache.org/licenses/LICENSE-2.0
 
-       http://www.apache.org/licenses/LICENSE-2.0
-
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
 -->
 
 <document>
@@ -39,6 +40,11 @@
       some of the simpler - and most common - usage patterns. Customization of
       FileUpload is described <a href="customizing.html">elsewhere</a>.
     </p>
+    <p>
+       FileUpload depends on Commons IO, so make sure you have the version 
+       mentioned on the <a href="dependencies.html">dependencies page</a> in 
+       your classpath before continuing.
+    </p>
   </section>
 
   <section name="How it works">
@@ -50,6 +56,12 @@
       and provide your application with a list of the individual uploaded
       items. Each such item implements the <code>FileItem</code> interface,
       regardless of its underlying implementation.
+    </p>
+    <p>
+      This page describes the traditional API of the commons fileupload
+      library. The traditional API is a convenient approach. However, for
+      ultimate performance, you might prefer the faster
+      <a href="streaming.html">Streaming API</a>.
     </p>
     <p>
       Each file item has a number of properties that might be of interest for
@@ -261,6 +273,64 @@ byte[] data = item.get();
 ...]]></source>
   </section>
 
+  <section name="Resource cleanup">
+    <p>
+      This section applies only, if you are using the
+      <a href="apidocs/org/apache/commons/fileupload/disk/DiskFileItem.html">DiskFileItem</a>.
+      In other words, it applies, if your uploaded files are written to
+      temporary files before processing them.
+    </p>
+    <p>
+      Such temporary files are deleted automatically, if they are no longer
+      used (more precisely, if the corresponding instance of <code>java.io.File</code>
+      is garbage collected. This is done silently by the <code>org.apache.commons.io.FileCleaner</code>
+      class, which starts a reaper thread.
+    </p>
+    <p>
+      This reaper thread should be stopped, if it is no longer needed. In
+      a servlet environment, this is done by using a special servlet
+      context listener, called
+      <a href="apidocs/org/apache/commons/fileupload/servlet/FileCleanerCleanup.html">FileCleanerCleanup</a>.
+      To do so, add a section like the following to your <code>web.xml</code>:
+<source><![CDATA[
+<web-app>
+  ...
+  <listener>
+    <listener-class>
+      org.apache.commons.fileupload.servlet.FileCleanerCleanup
+    </listener-class>
+  </listener>
+  ...
+</web-app>
+]]></source>
+    </p>
+    <p>
+      Unfortunately, this is not the whole story. The above applies only, if
+    </p>
+    <ol>
+      <li>You are using commons-io 1.3, or later.</li>
+      <li>You are loading commons-io from your web applications
+        WEB-INF/lib and not from another location, for example the
+        common/lib directory of Tomcat. This is not unlikely, because
+        there are quite a few applications, which do ship commons-io.</li>
+    </ol>
+    <p>
+      If commons-io 1.3 is loaded from your containers class path, then
+      the following might occur: Suggest that you have two applications,
+      called A and B running. (It might as well be the same application
+      with two names aka servlet contexts.) Both applications are using
+      the <code>FileCleanerCleanup</code>. Now, if you terminate application
+      A, but B is still running, then A terminates B's reaper thread as
+      well.
+    </p>
+    <p>
+      In other words, you should consider carefully, whether to use
+      the <code>FileCleanerCleanup</code>, or not. When unsure, or if you
+      are happy with commons-fileupload 1.1.1, or before, then you
+      possibly would like to avoid it.
+    </p>
+  </section>
+
   <section name="Interaction with virus scanners">
     <p>
       Virus scanners running on the same system as the web container can cause
@@ -293,6 +363,61 @@ byte[] data = item.get();
       configuring an external process or integrating virus scanning into an
       application are outside the scope of this document.
     </p>
+  </section>
+
+  <section name="Watching progress">
+    <p>
+      If you expect really large file uploads, then it would be nice to report
+      to your users, how much is already received. Even HTML pages allow to
+      implement a progress bar by returning a multipart/replace response,
+      or something like that.
+    </p>
+    <p>
+      Watching the upload progress may be done by supplying a progress listener:
+    </p>
+<source><![CDATA[//Create a progress listener
+ProgressListener progressListener = new ProgressListener(){
+   public void update(long pBytesRead, long pContentLength, int pItems) {
+       System.out.println("We are currently reading item " + pItems);
+       if (pContentLength == -1) {
+           System.out.println("So far, " + pBytesRead + " bytes have been read.");
+       } else {
+           System.out.println("So far, " + pBytesRead + " of " + pContentLength
+                              + " bytes have been read.");
+       }
+   }
+};
+upload.setProgressListener(progressListener);
+]]></source>
+    <p>
+      Do yourself a favour and implement your first progress listener just
+      like the above, because it shows you a pitfall: The progress listener
+      is called quite frequently. Depending on the servlet engine and other
+      environment factory, it may be called for any network packet! In
+      other words, your progress listener may become a performance problem!
+      A typical solution might be, to reduce the progress listeners activity.
+      For example, you might emit a message only, if the number of megabytes
+      has changed:
+    </p>
+<source><![CDATA[//Create a progress listener
+ProgressListener progressListener = new ProgressListener(){
+   private long megaBytes = -1;
+   public void update(long pBytesRead, long pContentLength, int pItems) {
+       long mBytes = pBytesRead / 1000000;
+       if (megaBytes == mBytes) {
+           return;
+       }
+       megaBytes = mBytes;
+       System.out.println("We are currently reading item " + pItems);
+       if (pContentLength == -1) {
+           System.out.println("So far, " + pBytesRead + " bytes have been read.");
+       } else {
+           System.out.println("So far, " + pBytesRead + " of " + pContentLength
+                              + " bytes have been read.");
+       }
+   }
+};
+]]></source>
   </section>
 
   <section name="What's next">

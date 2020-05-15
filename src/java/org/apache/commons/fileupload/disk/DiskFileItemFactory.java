@@ -1,11 +1,12 @@
 /*
- * Copyright 2001-2004 The Apache Software Foundation
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -38,11 +39,21 @@ import org.apache.commons.fileupload.FileItemFactory;
  * </ul>
  * </p>
  *
+ * <p>When using the <code>DiskFileItemFactory</code>, then you should
+ * consider the following: Temporary files are automatically deleted as
+ * soon as they are no longer needed. (More precisely, when the
+ * corresponding instance of {@link java.io.File} is garbage collected.)
+ * This is done by the so-called reaper thread, which is started
+ * automatically when the class {@link org.apache.commons.io.FileCleaner}
+ * is loaded. It might make sense to terminate that thread, for example,
+ * if your web application ends. See the section on "Resource cleanup"
+ * in the users guide of commons-fileupload.</p>
+ *
  * @author <a href="mailto:martinc@apache.org">Martin Cooper</a>
  *
  * @since FileUpload 1.1
  *
- * @version $Id: DiskFileItemFactory.java 155417 2005-02-26 13:00:27Z dirkv $
+ * @version $Id: DiskFileItemFactory.java 502350 2007-02-01 20:42:48Z jochen $
  */
 public class DiskFileItemFactory implements FileItemFactory {
 
@@ -78,6 +89,7 @@ public class DiskFileItemFactory implements FileItemFactory {
      * may be configured by calling the appropriate setter methods.
      */
     public DiskFileItemFactory() {
+        // Does nothing.
     }
 
 
@@ -130,7 +142,7 @@ public class DiskFileItemFactory implements FileItemFactory {
 
     /**
      * Returns the size threshold beyond which files are written directly to
-     * disk. The default value is 1024 bytes.
+     * disk. The default value is 10240 bytes.
      *
      * @return The size threshold, in bytes.
      *

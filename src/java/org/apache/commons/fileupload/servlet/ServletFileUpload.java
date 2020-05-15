@@ -1,11 +1,12 @@
 /*
- * Copyright 2001-2005 The Apache Software Foundation
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -15,9 +16,13 @@
  */
 package org.apache.commons.fileupload.servlet;
 
+import java.io.IOException;
 import java.util.List;
+
 import javax.servlet.http.HttpServletRequest;
+
 import org.apache.commons.fileupload.FileItemFactory;
+import org.apache.commons.fileupload.FileItemIterator;
 import org.apache.commons.fileupload.FileUpload;
 import org.apache.commons.fileupload.FileUploadException;
 
@@ -42,7 +47,7 @@ import org.apache.commons.fileupload.FileUploadException;
  * @author <a href="mailto:martinc@apache.org">Martin Cooper</a>
  * @author Sean C. Sullivan
  *
- * @version $Id: ServletFileUpload.java 350090 2005-12-01 00:56:20Z martinc $
+ * @version $Id: ServletFileUpload.java 479484 2006-11-27 01:06:53Z jochen $
  */
 public class ServletFileUpload extends FileUpload {
 
@@ -53,21 +58,25 @@ public class ServletFileUpload extends FileUpload {
      * Utility method that determines whether the request contains multipart
      * content.
      *
-     * @param req The servlet request to be evaluated. Must be non-null.
+     * @param request The servlet request to be evaluated. Must be non-null.
      *
      * @return <code>true</code> if the request is multipart;
      *         <code>false</code> otherwise.
      */
-    //NOTE: This method cannot be enabled until the one in FileUploadBase is
-    //      removed, since it is not possible to override a static method.
-    //public static final boolean isMultipartContent(
-    //        HttpServletRequest request) {
-    //    if (!"post".equals(request.getMethod().toLowerCase())) {
-    //        return false;
-    //    }
-    //    return FileUploadBase.isMultipartContent(
-    //            new ServletRequestContext(request));
-    //}
+    public static final boolean isMultipartContent(
+            HttpServletRequest request) {
+        if (!"post".equals(request.getMethod().toLowerCase())) {
+            return false;
+        }
+        String contentType = request.getContentType();
+        if (contentType == null) {
+            return false;
+        }
+        if (contentType.toLowerCase().startsWith(MULTIPART)) {
+            return true;
+        }
+        return false;
+    }
 
 
     // ----------------------------------------------------------- Constructors
@@ -90,6 +99,7 @@ public class ServletFileUpload extends FileUpload {
      * create <code>FileItem</code> instances.
      *
      * @see FileUpload#FileUpload()
+     * @param fileItemFactory The factory to use for creating file items.
      */
     public ServletFileUpload(FileItemFactory fileItemFactory) {
         super(fileItemFactory);
@@ -112,7 +122,29 @@ public class ServletFileUpload extends FileUpload {
      *                             the request or storing files.
      */
     public List /* FileItem */ parseRequest(HttpServletRequest request)
-            throws FileUploadException {
+    throws FileUploadException {
         return parseRequest(new ServletRequestContext(request));
+    }
+
+
+    /**
+     * Processes an <a href="http://www.ietf.org/rfc/rfc1867.txt">RFC 1867</a>
+     * compliant <code>multipart/form-data</code> stream.
+     *
+     * @param request The servlet request to be parsed.
+     *
+     * @return An iterator to instances of <code>FileItemStream</code>
+     *         parsed from the request, in the order that they were
+     *         transmitted.
+     *
+     * @throws FileUploadException if there are problems reading/parsing
+     *                             the request or storing files.
+     * @throws IOException An I/O error occurred. This may be a network
+     *   error while communicating with the client or a problem while
+     *   storing the uploaded content.
+     */
+    public FileItemIterator getItemIterator(HttpServletRequest request)
+    throws FileUploadException, IOException {
+        return super.getItemIterator(new ServletRequestContext(request));
     }
 }

@@ -1,18 +1,19 @@
 <?xml version="1.0"?>
 <!--
-   Copyright 2005-06 The Apache Software Foundation
+ Licensed to the Apache Software Foundation (ASF) under one or more
+ contributor license agreements.  See the NOTICE file distributed with
+ this work for additional information regarding copyright ownership.
+ The ASF licenses this file to You under the Apache License, Version 2.0
+ (the "License"); you may not use this file except in compliance with
+ the License.  You may obtain a copy of the License at
 
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
+      http://www.apache.org/licenses/LICENSE-2.0
 
-       http://www.apache.org/licenses/LICENSE-2.0
-
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
 -->
 
 <faqs title="FileUpload FAQ">
@@ -49,13 +50,22 @@
 
     <faq id="class-not-found">
       <question>
-        Why is NoClassDefFoundError being thrown while parsing?
+        Why is NoClassDefFoundError being thrown?
       </question>
       <answer>
-        This most commonly happens when attempting to rely on a shared copy of
+        <p>There are two common causes for this error. </p>
+        
+        <p>Firstly, it might simply mean that you do not have the Commons IO 
+        jar in your classpath. FileUpload depends on IO (see 
+        <a href="dependencies.html">dependencies</a>) - you can tell if 
+        this is the case if the missing class is within the 
+        <code>org.apache.commons.io</code> package. </p>
+
+        <p>Secondly this happens when attempting to rely on a shared copy of
         the Commons FileUpload jar file provided by your web container. The
         solution is to include the FileUpload jar file as part of your own
-        web application, instead of relying on the container.
+        web application, instead of relying on the container. The same may 
+        hold for FileUpload's IO dependency. </p>
       </answer>
     </faq>
 
