@@ -13,7 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.commons.fileupload;
+package org.apache.commons.fileupload.portlet;
+
+import java.util.List;
+import javax.portlet.ActionRequest;
+import org.apache.commons.fileupload.FileItemFactory;
+import org.apache.commons.fileupload.FileUpload;
+import org.apache.commons.fileupload.FileUploadBase;
+import org.apache.commons.fileupload.FileUploadException;
 
 /**
  * <p>High level API for processing file uploads.</p>
@@ -36,18 +43,28 @@ package org.apache.commons.fileupload;
  * @author <a href="mailto:martinc@apache.org">Martin Cooper</a>
  * @author Sean C. Sullivan
  *
- * @version $Id: FileUpload.java 155417 2005-02-26 13:00:27Z dirkv $
+ * @since FileUpload 1.1
+ *
+ * @version $Id: PortletFileUpload.java 350090 2005-12-01 00:56:20Z martinc $
  */
-public class FileUpload
-    extends FileUploadBase {
+public class PortletFileUpload extends FileUpload {
 
-    // ----------------------------------------------------------- Data members
+    // ---------------------------------------------------------- Class methods
 
 
     /**
-     * The factory to use to create new form items.
+     * Utility method that determines whether the request contains multipart
+     * content.
+     *
+     * @param request The portlet request to be evaluated. Must be non-null.
+     *
+     * @return <code>true</code> if the request is multipart;
+     *         <code>false</code> otherwise.
      */
-    private FileItemFactory fileItemFactory;
+    public static final boolean isMultipartContent(ActionRequest request) {
+        return FileUploadBase.isMultipartContent(
+                new PortletRequestContext(request));
+    }
 
 
     // ----------------------------------------------------------- Constructors
@@ -58,9 +75,9 @@ public class FileUpload
      * configured, using <code>setFileItemFactory()</code>, before attempting
      * to parse requests.
      *
-     * @see #FileUpload(FileItemFactory)
+     * @see FileUpload#FileUpload(FileItemFactory)
      */
-    public FileUpload() {
+    public PortletFileUpload() {
         super();
     }
 
@@ -69,35 +86,30 @@ public class FileUpload
      * Constructs an instance of this class which uses the supplied factory to
      * create <code>FileItem</code> instances.
      *
-     * @see #FileUpload()
+     * @see FileUpload#FileUpload()
      */
-    public FileUpload(FileItemFactory fileItemFactory) {
-        super();
-        this.fileItemFactory = fileItemFactory;
+    public PortletFileUpload(FileItemFactory fileItemFactory) {
+        super(fileItemFactory);
     }
 
 
-    // ----------------------------------------------------- Property accessors
+    // --------------------------------------------------------- Public methods
 
 
     /**
-     * Returns the factory class used when creating file items.
+     * Processes an <a href="http://www.ietf.org/rfc/rfc1867.txt">RFC 1867</a>
+     * compliant <code>multipart/form-data</code> stream.
      *
-     * @return The factory class for new file items.
-     */
-    public FileItemFactory getFileItemFactory() {
-        return fileItemFactory;
-    }
-
-
-    /**
-     * Sets the factory class to use when creating file items.
+     * @param request The portlet request to be parsed.
      *
-     * @param factory The factory class for new file items.
+     * @return A list of <code>FileItem</code> instances parsed from the
+     *         request, in the order that they were transmitted.
+     *
+     * @throws FileUploadException if there are problems reading/parsing
+     *                             the request or storing files.
      */
-    public void setFileItemFactory(FileItemFactory factory) {
-        this.fileItemFactory = factory;
+    public List /* FileItem */ parseRequest(ActionRequest request)
+            throws FileUploadException {
+        return parseRequest(new PortletRequestContext(request));
     }
-
-
 }

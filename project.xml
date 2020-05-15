@@ -1,10 +1,27 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--
+   Copyright 2002-2004 The Apache Software Foundation
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+-->
 
 <project>
-  <extend>../project.xml</extend>
+  <pomVersion>3</pomVersion>
+  
   <name>FileUpload</name>
-  <id>commons-fileupload</id>
-  <currentVersion>1.0</currentVersion>
+  <groupId>commons-fileupload</groupId>
+  <artifactId>commons-fileupload</artifactId>
+  <currentVersion>1.1</currentVersion>
   <inceptionYear>2002</inceptionYear>
   <shortDescription>File upload component for Java servlets</shortDescription>
   <description>
@@ -12,13 +29,68 @@
     support for multipart file upload functionality to servlets and web
     applications.
   </description>
-  <logo>/images/logo.gif</logo>
-  <package>org.apache.commons.fileupload</package>
+  <logo>/images/logo.png</logo>
+  
+  <url>http://jakarta.apache.org/commons/${pom.artifactId.substring(8)}/</url>
+  <package>org.apache.commons.${pom.artifactId.substring(8)}</package>
 
-  <url>http://jakarta.apache.org/commons/fileupload/</url>
-  <issueTrackingUrl>http://nagoya.apache.org/bugzilla/</issueTrackingUrl>
+  <organization>
+    <name>The Apache Software Foundation</name>
+    <url>http://jakarta.apache.org</url>
+    <logo>http://jakarta.apache.org/images/original-jakarta-logo.gif</logo>
+  </organization>
+
+  <licenses>
+	<license>
+    	<name>The Apache Software License, Version 2.0</name>
+    	<url>/LICENSE.txt</url>
+    	<distribution>repo</distribution>
+	</license>
+  </licenses>
+  
+  <gumpRepositoryId>jakarta</gumpRepositoryId>
+  <issueTrackingUrl>http://issues.apache.org/bugzilla/</issueTrackingUrl>
+  <siteAddress>jakarta.apache.org</siteAddress>
+  <siteDirectory>/www/jakarta.apache.org/commons/${pom.artifactId.substring(8)}/</siteDirectory>
+  <distributionDirectory>/www/jakarta.apache.org/builds/jakarta-commons/${pom.artifactId.substring(8)}/</distributionDirectory>
+  
+  <repository>
+    <connection>scm:svn:http://svn.apache.org/repos/asf/jakarta/commons/proper/${pom.artifactId.substring(8)}/trunk</connection>
+    <url>http://svn.apache.org/repos/asf</url>
+  </repository>
+  
+  <mailingLists>
+    <mailingList>
+      <name>Commons Dev List</name>
+      <subscribe>commons-dev-subscribe@jakarta.apache.org</subscribe>
+      <unsubscribe>commons-dev-unsubscribe@jakarta.apache.org</unsubscribe>
+      <archive>http://mail-archives.apache.org/eyebrowse/SummarizeList?listName=commons-dev@jakarta.apache.org</archive>
+    </mailingList>
+    <mailingList>
+      <name>Commons User List</name>
+      <subscribe>commons-user-subscribe@jakarta.apache.org</subscribe>
+      <unsubscribe>commons-user-unsubscribe@jakarta.apache.org</unsubscribe>
+      <archive>http://mail-archives.apache.org/eyebrowse/SummarizeList?listName=commons-user@jakarta.apache.org</archive>
+    </mailingList>
+  </mailingLists>
+ 
 
   <versions>
+    <version>
+      <id>1.1</id>
+      <name>1.1</name>
+      <tag>FILEUPLOAD_1_1</tag>
+    </version>
+    <version>
+      <id>1.1-rc2</id>
+      <name>1.1-rc2</name>
+      <tag>FILEUPLOAD_1_1_RC2</tag>
+    </version>
+    <version>
+      <id>1.1-rc1</id>
+      <name>1.1-rc1</name>
+      <tag>FILEUPLOAD_1_1_RC1</tag>
+    </version>
     <version>
       <id>1.0</id>
       <name>1.0</name>
@@ -41,7 +113,7 @@
       <name>Martin Cooper</name>
       <id>martinc</id>
       <email>martinc@apache.org</email>
-      <organization>Tumbleweed Communications</organization>
+      <organization>Informatica</organization>
     </developer>
     <developer>
       <name>dIon Gillard</name>
@@ -83,28 +155,93 @@
   
   <dependencies>
     <dependency>
-      <id>servletapi</id>
-      <version>2.3</version>
+      <groupId>commons-io</groupId>
+      <artifactId>commons-io</artifactId>
+      <version>1.1</version>
+      <url>http://jakarta.apache.org/commons/io/</url>
     </dependency>
     <dependency>
-      <id>junit</id>
+      <groupId>javax.servlet</groupId>
+      <artifactId>servlet-api</artifactId>
+      <version>2.3</version>
+      <url>http://java.sun.com/products/servlet/</url>
+      <properties>
+        <scope>provided</scope>
+      </properties>
+    </dependency>
+    <dependency>
+      <groupId>javax.portlet</groupId>
+      <artifactId>portlet-api</artifactId>
+      <version>1.0</version>
+      <url>http://portals.apache.org/pluto</url>
+      <properties>
+        <scope>provided</scope>
+        <comment>
+          Required only when using FileUpload in a portlet environment.
+        </comment>
+      </properties>
+    </dependency>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
       <version>3.8.1</version>
+      <url>http://www.junit.org/</url>
+      <properties>
+        <scope>test</scope>
+        <comment>
+          &lt;strong&gt;Test Only&lt;/strong&gt; - required only for
+          running the FileUpload unit tests.
+        </comment>
+      </properties>
     </dependency>
   </dependencies>
 
+  <build>
+    <nagEmailAddress>commons-dev@jakarta.apache.org</nagEmailAddress>
+    <sourceDirectory>src/java</sourceDirectory>
+    <unitTestSourceDirectory>src/test</unitTestSourceDirectory>
+    <unitTest>
+      <includes>
+        <include>**/*Test.java</include>
+      </includes>
+      <resources>
+         <resource>
+            <directory>${pom.build.unitTestSourceDirectory}</directory>
+            <includes>
+              <include>**/*.xml</include>
+            </includes>
+         </resource>
+      </resources>
+    </unitTest>
+
+    <resources>
+      <resource>
+        <directory>${basedir}</directory>
+        <targetPath>META-INF</targetPath>
+        <includes>
+          <include>NOTICE.txt</include>
+        </includes>
+      </resource>
+    </resources>
+  </build>
+  
   <reports>
+    <report>maven-changes-plugin</report>
     <report>maven-changelog-plugin</report>
     <report>maven-checkstyle-plugin</report>
+    <!--report>maven-clover-plugin</report-->
     <report>maven-developer-activity-plugin</report>
+    <report>maven-faq-plugin</report>
     <report>maven-file-activity-plugin</report>
     <report>maven-javadoc-plugin</report>
     <report>maven-jdepend-plugin</report>
     <report>maven-junit-report-plugin</report>
     <report>maven-jxr-plugin</report>
     <report>maven-license-plugin</report>
-    <report>maven-linkcheck-plugin</report>
+    <!--report>maven-linkcheck-plugin</report-->
+    <report>maven-pmd-plugin</report>
+    <report>maven-simian-plugin</report>
     <report>maven-tasklist-plugin</report>
-<!--    <report>maven-clover-plugin</report> -->
   </reports>
 
 </project>
