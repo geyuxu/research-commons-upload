@@ -60,7 +60,7 @@ import org.apache.commons.fileupload.ParameterParser;
  *
  * @since FileUpload 1.1
  *
- * @version $Id: DiskFileItem.java 356312 2005-12-12 18:09:00Z martinc $
+ * @version $Id: DiskFileItem.java 399546 2006-05-04 04:53:30Z martinc $
  */
 public class DiskFileItem
     implements FileItem {
@@ -115,6 +115,13 @@ public class DiskFileItem
      * The original filename in the user's filesystem.
      */
     private String fileName;
+
+
+    /**
+     * The size of the item, in bytes. This is used to cache the size when a
+     * file item is moved from its original location.
+     */
+    private long size = -1;
 
 
     /**
@@ -266,7 +273,9 @@ public class DiskFileItem
      * @return The size of the file, in bytes.
      */
     public long getSize() {
-        if (cachedContent != null) {
+        if (size >= 0) {
+            return size;
+        } else if (cachedContent != null) {
             return cachedContent.length;
         } else if (dfos.isInMemory()) {
             return dfos.getData().length;
@@ -388,6 +397,8 @@ public class DiskFileItem
         } else {
             File outputFile = getStoreLocation();
             if (outputFile != null) {
+                // Save the length of the file
+                size = outputFile.length();
                 /*
                  * The uploaded file is being stored on disk
                  * in a temporary location so move it to the

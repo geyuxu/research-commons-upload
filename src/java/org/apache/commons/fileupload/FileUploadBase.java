@@ -48,7 +48,7 @@ import org.apache.commons.fileupload.servlet.ServletRequestContext;
  * @author <a href="mailto:martinc@apache.org">Martin Cooper</a>
  * @author Sean C. Sullivan
  *
- * @version $Id: FileUploadBase.java 350197 2005-12-01 07:10:29Z martinc $
+ * @version $Id: FileUploadBase.java 367087 2006-01-08 20:19:37Z martinc $
  */
 public abstract class FileUploadBase {
 
@@ -433,8 +433,8 @@ public abstract class FileUploadBase {
         String fileName = null;
         String cd = getHeader(headers, CONTENT_DISPOSITION);
         if (cd != null) {
-            cd = cd.toLowerCase();
-            if (cd.startsWith(FORM_DATA) || cd.startsWith(ATTACHMENT)) {
+            String cdl = cd.toLowerCase();
+            if (cdl.startsWith(FORM_DATA) || cdl.startsWith(ATTACHMENT)) {
                 ParameterParser parser = new ParameterParser();
                 parser.setLowerCaseNames(true);
                 // Parameter parser can handle null input

@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <!--
-   Copyright 2003-2004 The Apache Software Foundation
+   Copyright 2003-2006 The Apache Software Foundation
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -49,31 +49,33 @@
           <li><a href="apidocs/index.html">JavaDoc API</a></li>
           <li><a href="maven-reports.html">Project Reports</a></li>
         </ul>
-        You can also <a href="http://svn.apache.org/viewcvs.cgi/jakarta/commons/proper/fileupload/trunk/">browse</a> the Subversion repository.
+        You can also <a href="cvs-usage.html">browse</a> the Subversion repository.
       </p>
     </section>
 
     <section name="Downloading">
         <subsection name='Full Releases'>
           <p>
+            <strong>FileUpload 1.1.1</strong> - 08 June 2006
+            <ul>
+              <li>Download the binary and source distributions from a mirror site
+                <a href='http://jakarta.apache.org/site/downloads/downloads_commons-fileupload.cgi'>here</a>
+              </li>
+            </ul>
+          </p>
+          <p>
             <strong>FileUpload 1.1</strong> - 22 Dec 2005
             <ul>
-              <li>Download the binary distribution from a mirror site
-                <a href='http://jakarta.apache.org/site/binindex.cgi'>here</a>
-              </li>
-              <li>Download the source distribution from a mirror site
-                <a href='http://jakarta.apache.org/site/sourceindex.cgi'>here</a>
+              <li>Download the binary and source distributions from a mirror site
+                <a href='http://jakarta.apache.org/site/downloads/downloads_commons-fileupload.cgi'>here</a>
               </li>
             </ul>
           </p>
           <p>
             <strong>FileUpload 1.0</strong> - 24 Jun 2003
             <ul>
-              <li>Download the binary distribution from a mirror site
-                <a href='http://jakarta.apache.org/site/binindex.cgi'>here</a>
-              </li>
-              <li>Download the source distribution from a mirror site
-                <a href='http://jakarta.apache.org/site/sourceindex.cgi'>here</a>
+              <li>Download the binary and source distributions from a mirror site
+                <a href='http://jakarta.apache.org/site/downloads/downloads_commons-fileupload.cgi'>here</a>
               </li>
             </ul>
           </p>
@@ -90,7 +92,7 @@
             </p>
             <p>
             Download nightly builds from 
-            <a href='http://cvs.apache.org/builds/jakarta-commons/nightly/commons-fileupload/'>here</a>.
+            <a href='http://people.apache.org/builds/jakarta-commons/nightly/commons-fileupload/'>here</a>.
             </p>
         </subsection>
     </section>
@@ -104,9 +106,7 @@
         so prefix your e-mail subject line with <em>[fileupload]</em>.
       </p>
       <p>
-        Issues may be reported via <a href="issue-tracking.html">ASF Bugzilla</a>.
-        Please remember that Bugzilla is shared between all Jakarta Commons
-        components, so prefix your issue summary with <em>[fileupload]</em>.
+        Issues may be reported via <a href="issue-tracking.html">ASF Jira</a>.
       </p>
     </section>
   </body>
