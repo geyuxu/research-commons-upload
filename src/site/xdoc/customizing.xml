@@ -16,10 +16,20 @@
  limitations under the License.
 -->
 
-<ruleset name="FileUpload Basic Rules">
-  <description>PMD Basic Ruleset minus the EmptyCatchBlock rule.</description>
+<document>
 
-  <rule ref="rulesets/basic.xml">
-    <exclude name="EmptyCatchBlock"/>
-  </rule>
-</ruleset>
+  <properties>
+    <title>Customizing FileUpload</title>
+    <author email="martinc@apache.org">Martin Cooper</author>
+  </properties>
+
+<body>
+
+  <section name="Customizing FileUpload">
+    <p>
+	  TODO: Document usage of factories and subclassing for customization.
+    </p>
+  </section>
+
+</body>
+</document>
